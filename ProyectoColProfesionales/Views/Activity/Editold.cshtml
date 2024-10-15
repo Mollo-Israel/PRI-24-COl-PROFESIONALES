@@ -1,0 +1,31 @@
+﻿@model ProyectoColProfesionales.Models.ActivityModel
+
+<h2>Editar Actividad</h2>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="idActivity" />
+
+    <div class="form-group">
+        <label asp-for="auditorium" class="control-label"></label>
+        <input asp-for="auditorium" class="form-control" />
+        <span asp-validation-for="auditorium" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="dateActivity" class="control-label"></label>
+        <input asp-for="dateActivity" class="form-control" />
+        <span asp-validation-for="dateActivity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="description" class="control-label"></label>
+        <textarea asp-for="description" class="form-control"></textarea>
+        <span asp-validation-for="description" class="text-danger"></span>
+    </div>
+
+    <!-- Agregar campos adicionales según sea necesario -->
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    </div>
+</form>

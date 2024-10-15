@@ -1,0 +1,61 @@
+﻿@model ProyectoColProfesionales.Models.PersonModel
+
+@{
+    ViewData["Title"] = "Formulario Persona";
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/css/multi-select-tag.css">
+<script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/js/multi-select-tag.js"></script>
+<h1>@ViewData["Title"]</h1>
+<form asp-action="Create" method="post" class="user-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="Names" class="control-label">Nombre</label>
+            <input asp-for="Names" class="form-control" placeholder="Nombre">
+            <span asp-validation-for="Names" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="Lastname" class="control-label">Primer Apellido</label>
+            <input asp-for="Lastname" class="form-control" placeholder="Primer Apellido">
+            <span asp-validation-for="Lastname" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="SecondLastName" class="control-label">Segundo Apellido</label>
+            <input asp-for="SecondLastName" class="form-control" placeholder="Segundo Apellido">
+            <span asp-validation-for="SecondLastName" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="IdentityNumber" class="control-label">C.I.</label>
+            <input asp-for="IdentityNumber" class="form-control" placeholder="Cédula de Identidad">
+            <span asp-validation-for="IdentityNumber" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="PhoneNumber" class="control-label">Número de Celular</label>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="Número de Celular">
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="Email" class="control-label">Correo Electrónico</label>
+            <input asp-for="Email" class="form-control" placeholder="Correo Electrónico">
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="role" class="control-label">Cargo</label>
+        <select id="role" name="Role" class="form-control">
+            <option value="Principal">Principal</option>
+            <option value="Secundario">Secundario</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" onclick="location.href='@Url.Action("Lista", "Persona")'" class="btn btn-secondary">Cancelar</button>
+
+    </div>
+</form>

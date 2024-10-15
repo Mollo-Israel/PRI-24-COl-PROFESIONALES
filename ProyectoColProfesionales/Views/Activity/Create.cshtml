@@ -1,0 +1,245 @@
+﻿@model ProyectoColProfesionales.Models.ActivityModel
+@{
+    ViewData["Title"] = "Formulario Defensa";
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/css/multi-select-tag.css">
+<script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/js/multi-select-tag.js"></script>
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="description" class="control-label">Descripción</label>
+                <input asp-for="description" class="form-control" placeholder="Descripción">
+                <span asp-validation-for="description" class="text-danger"></span>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="auditorium" class="control-label">Auditorio</label>
+                <input asp-for="auditorium" class="form-control" placeholder="Auditorio">
+                <span asp-validation-for="auditorium" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="dateActivity" class="control-label">Fecha y Hora de la defensa</label>
+                <input asp-for="dateActivity" class="form-control" placeholder="Fecha y Hora de la Actividad">
+                <span asp-validation-for="dateActivity" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="place" class="control-label">Ubicación</label>
+                <input asp-for="place" class="form-control" placeholder="Ubicación">
+                <span asp-validation-for="place" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Vista: Create.cshtml -->
+    <div class="form-group">
+        <label asp-for="idThesis" class="control-label">Proyecto</label>
+        <select class="form-control" id="idThesis" name="idThesis" asp-for="idThesis">
+            @foreach (var thesis in ViewBag.AvailableTheses)
+            {
+                <option value="@thesis.IdThesis">@thesis.Description</option>
+            }
+        </select>
+        @* <select asp-for="idThesis" class="form-control" asp-items="ViewBag.AvailableTheses"></select> *@
+        <span asp-validation-for="idThesis" class="text-danger"></span>
+
+    </div>
+
+
+    <!--Inicio Contenedor del mapa -->
+    <div class="row">
+
+        <div class="col-md-12">
+                <div id="mapContainer" style="width: 100%; height: 460px;"></div>
+
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="longitude" class="control-label">Longitud</label>
+                    <input asp-for="longitude" class="form-control" readonly />
+                    <span asp-validation-for="longitude" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="latitude" class="control-label">Latitud</label>
+                    <input asp-for="latitude" class="form-control" readonly />
+                    <span asp-validation-for="latitude" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="stateActivity" class="control-label">Estado de la defensa</label>
+                    <input class="form-control" asp-for="stateActivity" value="Pendiente" readonly>
+                </div>
+            </div>
+        
+    </div>
+
+    <!-- Estado de la defensa -->
+   
+    <div class="row">
+       @*  <div class="col-md-6">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="hasAssistance" asp-for="hasAssistance">
+                <label class="form-check-label" for="hasAssistance">
+                    Confirmación de asistencia
+                </label>
+                <span asp-validation-for="hasAssistance" class="text-danger"></span>
+
+            </div>
+            <div class="form-group" id="voucherAsistenceFileGroup" style="display:none;">
+                <label asp-for="voucherAsistenceFile" class="control-label">Comprobante de Asistencia</label>
+                <input type="file" class="form-control-file" id="voucherAsistenceFile" name="voucherAsistenceFile">
+                <span asp-validation-for="voucherAsistenceFile" class="text-danger"></span>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="hasPayment" asp-for="hasPayment">
+                <label class="form-check-label" for="hasPayment">
+                    Confirmación de Pago
+                </label>
+                <span asp-validation-for="hasPayment" class="text-danger"></span>
+
+            </div>
+            <div class="form-group" id="voucherPayFileGroup" style="display:none;">
+                <label asp-for="voucherPayFile" class="control-label">Comprobante de Pago</label>
+                <input type="file" class="form-control-file" id="voucherPayFile" name="voucherPayFile">
+                <span asp-validation-for="voucherPayFile" class="text-danger"></span>
+
+            </div>
+        </div> *@
+
+
+    </div>
+
+
+    <!--Seleccion de profesionales-->
+    <div class="form-group">
+        <label for="inputProfessionals">Tribunal</label>
+        <select asp-for="ProfessionalsAndPersons" multiple class="form-control" id="ProfessionalsAndPersons" name="ProfessionalsAndPersons">
+            @foreach (var option in ViewBag.ProfessionalsAndPersons)
+            {
+                <option value="@option.Value">@option.Text</option>
+            }
+        </select>
+        <span asp-validation-for="ProfessionalsAndPersons" class="text-danger"></span>
+
+    </div> 
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="btn btn-secondary">Cancelar</button>
+    </div>
+</form>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?callback=loadMap" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+
+    <script>
+        var map;
+        var pin;
+
+        function loadMap() {
+            map = new Microsoft.Maps.Map(document.getElementById('mapContainer'), {
+                credentials: 'AgqOaEk-a82xj49nR5TlSVCRSO_tOw0yV3PSCnfUiD533uSOhRpQO5HaqzoYAmlh',
+                center: new Microsoft.Maps.Location(-17.338097, -66.218838), // Coordenadas del centro del mapa
+                zoom: 15 // Nivel de zoom inicial
+            });
+
+            Microsoft.Maps.Events.addHandler(map, 'click', addPin);
+        }
+
+        function addPin(e) {
+            var location = e.location;
+
+            // Si ya hay un pin, quitarlo antes de agregar uno nuevo
+            if (pin) {
+                map.entities.remove(pin);
+            }
+
+            // Crear un nuevo pin en la ubicación seleccionada
+            pin = new Microsoft.Maps.Pushpin(location, {
+                color: 'red'
+            });
+
+            // Agregar el pin al mapa
+            map.entities.push(pin);
+
+            // Actualizar campos de longitud y latitud en el formulario
+            document.getElementById('longitude').value = location.longitude.toFixed(6);
+            document.getElementById('latitude').value = location.latitude.toFixed(6);
+        }
+
+        // Función para agregar profesionales seleccionados a la tabla
+        function addProfessional() {
+            var selectElement = document.getElementById("ProfessionalsAndPersons");
+            var selectedOptions = selectElement.selectedOptions;
+
+            for (var i = 0; i < selectedOptions.length; i++) {
+                agregarProfesional(selectedOptions[i].text);
+            }
+        }
+
+        // Función para agregar un profesional a la tabla
+        function agregarProfesional(nombreProfesional) {
+            var tableBody = document.getElementById("selectedProfessionalsTable").getElementsByTagName("tbody")[0];
+            var newRow = tableBody.insertRow();
+            var cell1 = newRow.insertCell(0);
+            cell1.innerHTML = nombreProfesional;
+            var cell2 = newRow.insertCell(1);
+            var botonQuitar = document.createElement("button");
+            botonQuitar.textContent = "Quitar de la lista";
+            botonQuitar.onclick = function () {
+                this.parentNode.parentNode.remove();
+            };
+            cell2.appendChild(botonQuitar);
+        }
+
+        $('#idThesis').select2().on('select2:open', function (e) {
+            $('.select2-search__field').attr('placeholder', 'Buscar Tesis...');
+        })
+
+        new MultiSelectTag('ProfessionalsAndPersons', {
+            placeholder: 'Buscar Profesional'
+        });  // id
+
+        // Función para mostrar u ocultar el campo de carga de archivos según el estado del checkbox
+        function toggleFileUpload(checkboxId, fileInputId) {
+            var checkbox = document.getElementById(checkboxId);
+            var fileInputGroup = document.getElementById(fileInputId + 'Group');
+
+            if (checkbox.checked) {
+                fileInputGroup.style.display = 'block'; // Mostrar el campo de carga de archivos
+            } else {
+                fileInputGroup.style.display = 'none'; // Ocultar el campo de carga de archivos
+            }
+        }
+
+        // Asignar eventos de cambio a los checkboxes para llamar a la función toggleFileUpload
+        document.getElementById('hasAssistance').addEventListener('change', function () {
+            toggleFileUpload('hasAssistance', 'voucherAsistenceFile');
+        });
+        document.getElementById('hasPayment').addEventListener('change', function () {
+            toggleFileUpload('hasPayment', 'voucherPayFile');
+        });
+    </script>
+}

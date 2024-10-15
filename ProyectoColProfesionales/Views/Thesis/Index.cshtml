@@ -1,0 +1,135 @@
+﻿@model IEnumerable<ProyectoColProfesionales.Models.DB1.Thesis>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<link href="~/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row">
+            <div class="col-md-10"><h6 class="m-0 font-weight-bold text-primary">Proyecto</h6></div>
+            <div class="col-md-2" style="justify-items:end">
+                <a asp-action="Create" class="btn btn-success btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span class="text">Registrar Proyecto</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>
+                            @* @Html.DisplayNameFor(model => model.Type) *@
+                            Tipo de Proyecto
+                        </th>
+                        <th>
+                            Título
+                            @* @Html.DisplayNameFor(model => model.Description) *@
+                        </th>
+                        <th>
+                            Estudiante
+                            @* @Html.DisplayNameFor(model => model.Student) *@
+                        </th>
+                        <th>
+                            Carrera
+                            @* @Html.DisplayNameFor(model => model.Career) *@
+                        </th>
+                        <th>
+                            Fecha de registro
+                            @* @Html.DisplayNameFor(model => model.RegisterDate) *@
+                        </th>
+                        <th>
+                            Acción
+                        </th>
+                    </tr>
+                </thead>
+           
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Type)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Student)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Career)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RegisterDate)
+                            </td>
+                            <td style="display: flex">
+                          
+                                <button type="button" class="btn btn-primary" onclick="window.location.href='@Url.Action("Details", new { id = item.IdThesis })'" style="margin: 5px 5px;">
+                                    <i class="fas fa-eye"></i> <!-- Icono de un ojo -->
+                                </button>
+                                <button type="button" class="btn btn-danger deleteButton" data-id="@item.IdThesis" style="margin: 5px 5px;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+
+                            </td>
+                     
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@{
+}
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable(
+                {
+                    language: {
+                        //"decimal": "",
+                        "emptyTable": "No hay información",
+                        "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+                        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+                        "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+                        "infoPostFix": "",
+                        "thousands": ",",
+                        "lengthMenu": "Mostrar _MENU_ Entradas",
+                        "loadingRecords": "Cargando...",
+                        "processing": "Procesando...",
+                        "search": "Buscar:",
+                        "zeroRecords": "Sin resultados encontrados",
+                        "paginate": {
+                            "first": "Primero",
+                            "last": "Ultimo",
+                            "next": "Siguiente",
+                            "previous": "Anterior"
+                        }
+                    }
+                });
+    });
+        $(document).ready(function () {
+            $('.deleteButton').click(function (e) {
+                e.preventDefault(); // Detener el envío del formulario
+
+                var itemId = $(this).data('id');
+                var confirmation = confirm('¿Estás seguro de que quieres eliminar esta tesis?');
+
+                if (confirmation) {
+                    window.location.href = '@Url.Action("Delete", "Thesis")/' + itemId; // Redirigir a la acción de eliminación si el usuario confirma
+                }
+            });
+        });
+        
+</script>
+
+<script src="~/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="~/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+@* <script src="~/js/demo/datatables-demo.js"></script> *@
+}

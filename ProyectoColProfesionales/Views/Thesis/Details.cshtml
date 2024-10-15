@@ -1,0 +1,71 @@
+﻿@model ProyectoColProfesionales.Models.DB1.Thesis
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Detalle</h1>
+
+<div>
+    <h4>Tesis</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            Tipo
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Type)
+        </dd>
+        <dt class = "col-sm-2">
+            Descripción
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            Estudiante
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Student)
+        </dd>
+        <dt class = "col-sm-2">
+            Carrera
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Career)
+        </dd>
+        <dt class = "col-sm-2">
+            Fecha de registro
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RegisterDate)
+        </dd>
+        @* <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LastUpdate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LastUpdate)
+        </dd> *@
+        @* <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd> *@
+    </dl>
+    <div>
+        <a asp-action="Download" asp-route-id="@Model?.IdThesis" target="_blank" class="btn btn-secondary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-right"></i>
+            </span>
+            <span class="text">Descargar Archivo</span>
+        </a>
+    </div>
+</div>
+<br />
+<br />
+<div>
+    <button type="button" class="btn btn-primary" onclick="window.location.href='@Url.Action("Index")'">Volver a la lista</button>
+</div>
+
+

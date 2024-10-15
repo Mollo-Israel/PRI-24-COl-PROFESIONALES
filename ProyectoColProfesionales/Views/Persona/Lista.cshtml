@@ -1,0 +1,94 @@
+﻿@model IEnumerable<dynamic>
+@{
+    ViewData["Title"] = "Lista de Usuarios";
+}
+<link href="~/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row">
+            <div class="col-md-10">
+                <h6 class="m-0 font-weight-bold text-primary">Usuarios</h6>
+            </div>
+            <div class="col-md-2 text-right">
+                <a href="@Url.Action("Create", "Persona")" class="btn btn-success btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span class="text">Registrar Usuario</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Nombre completo</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.FullName</td>
+                            <td>@item.Email</td>
+                            <td>@item.Role</td>
+                            <td style="display: flex; justify-content: center;">
+                                <form asp-action="Delete" method="post" class="deleteForm">
+                                    <input type="hidden" name="id" value="@item.IdPerson" />
+                                    <button type="submit" class="btn btn-danger deleteButton" style="margin: 5px 5px;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable({
+                language: {
+                    //"decimal": "",
+                    "emptyTable": "No hay información",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+                    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+                    "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "Mostrar _MENU_ Entradas",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "Sin resultados encontrados",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Ultimo",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                }
+            });
+            $('.deleteForm').on('submit', function (e) {
+                var confirmation = confirm('¿Estás seguro de que quieres eliminar este usuario?');
+                if (!confirmation) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+    </script>
+}

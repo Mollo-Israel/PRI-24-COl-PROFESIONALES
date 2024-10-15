@@ -1,0 +1,103 @@
+﻿@model ProyectoColProfesionales.Models.ActivityEditModel
+
+@{
+    ViewData["Title"] = "Formulario de comprobante";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/css/multi-select-tag.css">
+<script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/js/multi-select-tag.js"></script>
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="idActivity" />
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="description" class="control-label">Descripción</label>
+                <input asp-for="description" class="form-control" placeholder="Descripción" readonly="readonly" />
+                <span asp-validation-for="description" class="text-danger"></span>
+            </div>
+        </div>
+     
+    </div>
+  
+
+    <!-- Vista: Create.cshtml -->
+    <!-- Agregar aquí los campos adicionales de la vista Create.cshtml -->
+    <!--Estado de la defensa-->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="hasAssistance" asp-for="hasAssistance">
+                <label class="form-check-label" for="hasAssistance">
+                    Confirmación de asistencia
+                </label>
+                <span asp-validation-for="hasAssistance" class="text-danger"></span>
+
+            </div>
+            <div class="form-group" id="voucherAsistenceFileGroup" style="display:none;">
+                <label asp-for="voucherAsistenceFile" class="control-label">Comprobante de Asistencia</label>
+                <input type="file" class="form-control-file" id="voucherAsistenceFile" name="voucherAsistenceFile">
+                <span asp-validation-for="voucherAsistenceFile" class="text-danger"></span>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="hasPayment" asp-for="hasPayment">
+                <label class="form-check-label" for="hasPayment">
+                    Confirmación de Pago
+                </label>
+                <span asp-validation-for="hasPayment" class="text-danger"></span>
+
+            </div>
+            <div class="form-group" id="voucherPayFileGroup" style="display:none;">
+                <label asp-for="voucherPayFile" class="control-label">Comprobante de Pago</label>
+                <input type="file" class="form-control-file" id="voucherPayFile" name="voucherPayFile">
+                <span asp-validation-for="voucherPayFile" class="text-danger"></span>
+
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="btn btn-secondary">Cancelar</button>
+        </div>
+    </div>
+
+    
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?callback=loadMap" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+
+    <script>
+        // Código JavaScript necesario para la vista Edit.cshtml
+        // ...
+
+        // Función para mostrar u ocultar el campo de carga de archivos según el estado del checkbox
+        function toggleFileUpload(checkboxId, fileInputId) {
+            var checkbox = document.getElementById(checkboxId);
+            var fileInputGroup = document.getElementById(fileInputId + 'Group');
+
+            if (checkbox.checked) {
+                fileInputGroup.style.display = 'block'; // Mostrar el campo de carga de archivos
+            } else {
+                fileInputGroup.style.display = 'none'; // Ocultar el campo de carga de archivos
+            }
+        }
+
+        // Asignar eventos de cambio a los checkboxes para llamar a la función toggleFileUpload
+        document.getElementById('hasAssistance').addEventListener('change', function () {
+            toggleFileUpload('hasAssistance', 'voucherAsistenceFile');
+        });
+        document.getElementById('hasPayment').addEventListener('change', function () {
+            toggleFileUpload('hasPayment', 'voucherPayFile');
+        });
+    </script>
+}
