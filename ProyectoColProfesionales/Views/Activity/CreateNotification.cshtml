@@ -1,0 +1,39 @@
+﻿@model ProyectoColProfesionales.Models.NotificationModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+<link rel="stylesheet" href="~/css/notifications.css" />
+
+<h2 class="notification-header">Notificación de Asistencia</h2>
+<p class="center-text">Recordatorios predeterminados:</p>
+
+<div class="reminders-container">
+    <div class="reminders">
+        <span>1.Presentación 14/09/2025</span>
+        <span>2.La presentación es a las 12:00</span>
+        <span>3.No olvides la presentación</span>
+    </div>
+    <button class="select-button">Seleccionar recordatorios</button>
+</div>
+
+<div class="message-container">
+    <label for="custom-message">Mensaje personalizado:</label>
+    <input type="text" id="custom-message" class="message-input" placeholder="Escribe tu mensaje aquí" />
+
+    <div class="side-by-side-container">
+        <div class="input-group">
+            <label for="phone">Teléfono</label>
+            <input type="number" id="phone" class="message-input" placeholder="" />
+        </div>
+        <div class="input-group">
+            <label for="profession">Profesión</label>
+            <input type="text" id="profession" class="message-input" placeholder="" />
+        </div>
+    </div>
+
+    <button class="save-message-button">Guardar mensaje</button>
+
+    <div class="action-buttons">
+        <button class="program-button">Programar</button>
+        <button class="cancel-button">Cancelar</button>
+    </div>
