@@ -5,6 +5,7 @@ namespace ProyectoColProfesionales.Models;
 public class ActivityModel
 {
     public int idActivity { get; set; }
+
     [Required(ErrorMessage = "La descripción es obligatorio.")]
     public string description { get; set; }
 
@@ -17,20 +18,26 @@ public class ActivityModel
 
     [Required(ErrorMessage = "El auditorio es obligatorio.")]
     public string auditorium { get; set; }
+
     [Required(ErrorMessage = "La ubicación es obligatorio.")]
     public string place { get; set; }
+
     [Required(ErrorMessage = "El proyecto es obligatorio.")]
     public int idThesis { get; set; }
+
     public DateTime registerDate { get; set; }
     public DateTime lastUpdate { get; set; }
     public byte status { get; set; }
     public int idUserRegister { get; set; }
     public int idUserLastUpdate { get; set; }
+
     [Required(ErrorMessage = "El campo es obligatorio.")]
     public string latitude { get; set; }
 
+
     [Required(ErrorMessage = "El campo es obligatorio.")]
     public string longitude { get; set; }
+
     public string stateActivity { get; set; }
 
     //[Required(ErrorMessage = "El campo es obligatorio.")]

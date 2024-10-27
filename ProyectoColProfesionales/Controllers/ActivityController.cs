@@ -40,6 +40,31 @@ namespace ProyectoColProfesionales.Controllers
             _wordProcessor = new WordProcessor();
             _directoryPath = Path.Combine(_env.WebRootPath, "templates") + "\\";
         }
+        // Nueva acción para mostrar la vista de Notificación de Asistencia
+        [HttpPost]
+        public async Task<IActionResult> CreateNotification(int id)
+        {
+            var activity = await _context.Activities
+                .Include(a => a.ActivityProfessionals)
+                .ThenInclude(ap => ap.IdProfessionalNavigation)
+                .ThenInclude(p => p.IdPersonNavigation) // Incluyendo los datos de la persona
+                .FirstOrDefaultAsync(a => a.IdActivity == id);
+
+            if (activity == null)
+            {
+                return NotFound();
+            }
+
+            return View(activity);
+        }
+
+
+        [HttpPost]
+        public IActionResult SaveActivity(ActivityModel model)
+        {
+            // Lógica para guardar los datos del formulario y la notificación
+            return RedirectToAction("Index");
+        }
 
         //public IActionResult Index()
         //{

@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Formulario Defensa";
 }
+<link rel="stylesheet" href="~/css/defenseForms.css" />
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/css/multi-select-tag.css">
 <script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/js/multi-select-tag.js"></script>
@@ -144,6 +146,15 @@
         <button type="submit" class="btn btn-primary">Guardar</button>
         <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="btn btn-secondary">Cancelar</button>
     </div>
+
+    <div class="whatsapp-button-container">
+        <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("CreateNotification", "Activity")'">
+            WhatsApp
+        </button>
+    </div>
+
+
+
 </form>
 
 
