@@ -40,6 +40,19 @@ namespace ProyectoColProfesionales.Controllers
             _wordProcessor = new WordProcessor();
             _directoryPath = Path.Combine(_env.WebRootPath, "templates") + "\\";
         }
+        // Nueva acción para mostrar la vista de Notificación de Asistencia
+        public IActionResult CreateNotification()
+        {
+            // Retornar la vista CreateNotification.cshtml
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult SaveActivity(ActivityModel model)
+        {
+            // Lógica para guardar los datos del formulario y la notificación
+            return RedirectToAction("Index");
+        }
 
         //public IActionResult Index()
         //{
@@ -66,30 +79,25 @@ namespace ProyectoColProfesionales.Controllers
         // GET: Activity/Create
         public IActionResult Create()
         {
-
+            // Obtener las tesis disponibles
             List<Thesis> availableTheses = _context.Theses.Where(t => t.Status == 1).ToList();
             ViewBag.AvailableTheses = availableTheses;
 
-            //ViewBag.Professionals = new SelectList(_context.Professionals.ToList(),"", "");
-            List<SelectListItem> professionalsAndPersons = new List<SelectListItem>();
-            using (var db = new Models.DB.DBColProfessionalContext())
-            {
-                //profesionals=db.Professionals.ToList();
+            // Crear la lista de profesionales y personas
+            List<SelectListItem> professionalsAndPersons = (from p in _context.Professionals
+                                                            join per in _context.People on p.IdPerson equals per.IdPerson
+                                                            select new SelectListItem
+                                                            {
+                                                                Value = $"{p.IdProfessional}", // Usamos el Id del Profesional como valor
+                                                                Text = $"{per.Names} {per.Lastname}" // Concatenamos el nombre del Profesional y de la Persona
+                                                            }).ToList();
 
-                professionalsAndPersons = (from p in db.Professionals
-                                           join per in db.People on p.IdPerson equals per.IdPerson
-                                           select new SelectListItem
-                                           {
-                                               Value = $"{p.IdProfessional}", // Usamos el Id del Profesional como valor
-                                               Text = $"{per.Names} {per.Lastname}" // Concatenamos el nombre del Profesional y de la Persona
-                                           }).ToList();
-
-
-            }
+            // Asignar la lista a ViewBag
             ViewBag.ProfessionalsAndPersons = professionalsAndPersons;
 
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ActivityModel activity1)
@@ -98,13 +106,12 @@ namespace ProyectoColProfesionales.Controllers
             {
                 try
                 {
-                    
                     // Establecer la fecha de registro y actualización
                     activity1.registerDate = DateTime.Now;
                     activity1.lastUpdate = DateTime.Now;
 
                     // Crear una nueva actividad
-                    Models.DB.Activity activity = new Models.DB.Activity
+                    Activity activity = new Activity
                     {
                         Auditorium = activity1.auditorium,
                         DateActivity = activity1.dateActivity,
@@ -120,77 +127,72 @@ namespace ProyectoColProfesionales.Controllers
                         RegisterDate = DateTime.Now
                     };
 
-                    using (var db = new Models.DB.DBColProfessionalContext())
+                    // Guardar la actividad en la base de datos
+                    _context.Activities.Add(activity);
+                    await _context.SaveChangesAsync();
+
+                    // Guardar el voucher asociado a la actividad
+                    if (activity1.voucherAsistenceFile != null && activity1.voucherAsistenceFile.Length > 0)
                     {
-                        // Guardar la actividad en la base de datos
-                        db.Activities.Add(activity);
-                        await db.SaveChangesAsync();
-
-                        // Guardar el voucher asociado a la actividad
-                        if (activity1.voucherAsistenceFile != null && activity1.voucherAsistenceFile.Length > 0)
+                        var activityVoucher = new Models.DB1.ActivityVoucher
                         {
-                            var activityVoucher = new ProyectoColProfesionales.Models.DB.ActivityVoucher
+                            VoucherType = "Comprobante de Asistencia",
+                            VoucherFile = await ConvertToByteArrayAsync(activity1.voucherAsistenceFile),
+                            NameFile = activity1.voucherAsistenceFile.FileName,
+                            IdActivity = activity.IdActivity
+                        };
+
+                        _context.ActivityVouchers.Add(activityVoucher);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Guardar el voucher asociado al pago
+                    if (activity1.voucherPayFile != null && activity1.voucherPayFile.Length > 0)
+                    {
+                        var activityVoucher1 = new Models.DB1.ActivityVoucher
+                        {
+                            VoucherType = "Comprobante de Pago",
+                            VoucherFile = await ConvertToByteArrayAsync(activity1.voucherPayFile),
+                            NameFile = activity1.voucherPayFile.FileName,
+                            IdActivity = activity.IdActivity
+                        };
+
+                        _context.ActivityVouchers.Add(activityVoucher1);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Guardar los profesionales asociados a la actividad
+                    if (activity1.ProfessionalsAndPersons != null)
+                    {
+                        foreach (var id in activity1.ProfessionalsAndPersons)
+                        {
+                            var activityProfessional = new Models.DB1.ActivityProfessional
                             {
-                                VoucherType = "Comprobante de Asistencia", // Puedes establecer un tipo de comprobante aquí si es relevante
-                                VoucherFile = await ConvertToByteArrayAsync(activity1.voucherAsistenceFile), // Convertir el archivo a un array de bytes
-                                NameFile = activity1.voucherAsistenceFile.FileName,
-                                IdActivity = activity.IdActivity // Asociar el comprobante con la actividad recién creada
+                                IdActivity = activity.IdActivity,
+                                IdProfessional = id
                             };
-
-                            db.ActivityVouchers.Add(activityVoucher);
-                            await db.SaveChangesAsync();
-                        }
-                        // Guardar el voucher asociado a la actividad
-                        if (activity1.voucherPayFile != null && activity1.voucherPayFile.Length > 0)
-                        {
-                            var activityVoucher1 = new ProyectoColProfesionales.Models.DB.ActivityVoucher
-                            {
-                                VoucherType = "Comprobante de Pago", // Puedes establecer un tipo de comprobante aquí si es relevante
-                                VoucherFile = await ConvertToByteArrayAsync(activity1.voucherPayFile), // Convertir el archivo a un array de bytes
-                                NameFile = activity1.voucherPayFile.FileName,
-                                IdActivity = activity.IdActivity // Asociar el comprobante con la actividad recién creada
-                            };
-
-                            db.ActivityVouchers.Add(activityVoucher1);
-                            await db.SaveChangesAsync();
-                        }
-
-                        if (activity1.ProfessionalsAndPersons != null)
-                        {
-                            foreach (var id in activity1.ProfessionalsAndPersons)
-                            {
-
-                                var activityProfesional = new ProyectoColProfesionales.Models.DB.ActivityProfessional
-                                {
-                                    IdActivity = activity.IdActivity,
-                                    IdProfessional = id
-                                };
-                                db.ActivityProfessionals.Add(activityProfesional);
-                                await db.SaveChangesAsync();
-                            }
+                            _context.ActivityProfessionals.Add(activityProfessional);
+                            await _context.SaveChangesAsync();
                         }
                     }
+
+                    // Obtener la lista de profesionales
                     var professionalIds = activity1.ProfessionalsAndPersons;
                     var profesionalList = await (from p in _context.Professionals
-                                        join per in _context.People on p.IdPerson equals per.IdPerson
-                                        where professionalIds.Contains(p.IdProfessional)
-                                        select per
-                                        
-                                        ).ToListAsync();
+                                                 join per in _context.People on p.IdPerson equals per.IdPerson
+                                                 where professionalIds.Contains(p.IdProfessional)
+                                                 select per).ToListAsync();
 
+                    // Obtener información del estudiante (tesis)
                     var thesisId = activity1.idThesis;
-                    var student = await _context.Theses.Where(x=>x.IdThesis== thesisId).FirstOrDefaultAsync();
-                    string studentName = "";
-                    string studentCareer = "";
-                    if(student!= null)
-                    {
-                        studentName = student.Student;
-                        studentCareer = student.Career;
-                    }
+                    var student = await _context.Theses.Where(x => x.IdThesis == thesisId).FirstOrDefaultAsync();
+                    string studentName = student?.Student ?? "";
+                    string studentCareer = student?.Career ?? "";
 
-                    //string emailContent = $"Buenas tardes,<br/>Fuiste asignado como tribunal.<br/> En la fecha: {activity1.dateActivity}<br/>";
+                    // Preparar contenido del correo electrónico
                     string emailContent = $"Buenas tardes,<br/><br/>Te informamos que has sido seleccionado/a para formar parte del tribunal en la próxima actividad.<br/>Fecha y hora de la actividad: {activity1.dateActivity}.<br/>Agradecemos tu colaboración y compromiso.<br/><br/>Saludos cordiales.";
 
+                    // Enviar correos electrónicos a los profesionales
                     foreach (var itemProfesional in profesionalList)
                     {
                         var streamTemp = _wordProcessor.ModelLetter(_directoryPath, _templateLetter, new AttributeReplaceLetter
@@ -204,35 +206,34 @@ namespace ProyectoColProfesionales.Controllers
 
                         await _emailSender.SendEmailAsync(itemProfesional.Email, "Detalles de tu cuenta", emailContent, streamTemp.memoryStream, streamTemp.NameFile);
                     }
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
                     // Manejar cualquier excepción que ocurra durante el proceso de guardado
                     ModelState.AddModelError("", "Ocurrió un error al guardar la actividad. Por favor, inténtalo de nuevo.");
-                    // Puedes agregar registros de errores a tus registros de aplicación para su posterior análisis
-                    //_logger.LogError(ex, "Error al guardar la actividad.");
                 }
             }
+
+            // Si hay errores de validación, recargar la vista con los datos ingresados por el usuario
             List<Thesis> availableTheses = _context.Theses.Where(t => t.Status == 1).ToList();
             ViewBag.AvailableTheses = new SelectList(availableTheses, "IdThesis", "Description");
 
-            // Si hay errores de validación, recargar la vista con los datos ingresados por el usuario
-            List<SelectListItem> professionalsAndPersons = new List<SelectListItem>();
-            using (var db = new Models.DB.DBColProfessionalContext())
-            {
-                professionalsAndPersons = (from p in db.Professionals
-                                           join per in db.People on p.IdPerson equals per.IdPerson
-                                           select new SelectListItem
-                                           {
-                                               Value = $"{p.IdProfessional}",
-                                               Text = $"{per.Names} {per.Lastname}"
-                                           }).ToList();
-            }
-            
+            // Recargar el combo de Profesionales y Personas
+            List<SelectListItem> professionalsAndPersons = await (from p in _context.Professionals
+                                                                  join per in _context.People on p.IdPerson equals per.IdPerson
+                                                                  select new SelectListItem
+                                                                  {
+                                                                      Value = $"{p.IdProfessional}",
+                                                                      Text = $"{per.Names} {per.Lastname}"
+                                                                  }).ToListAsync();
+
             ViewBag.ProfessionalsAndPersons = professionalsAndPersons;
+
             return View(activity1);
         }
+
 
         private string GetDateSpanish()
         {
@@ -270,36 +271,39 @@ namespace ProyectoColProfesionales.Controllers
         {
             try
             {
-                using (var db = new DBColProfessionalContext())
+                // Obtener la actividad por su ID usando el DbContext inyectado
+                var activity = await _context.Activities.FindAsync(id);
+
+                if (activity != null)
                 {
-                    // Obtener la actividad por su ID
-                    var activity = await db.Activities.FindAsync(id);
-                    if (activity != null)
-                    {
-                        // Cambiar el estado de la actividad a 0
-                        activity.Status = 0;
-                        activity.StateActivity = "Reprogramado";
-                        // Guardar los cambios en la base de datos
-                        await db.SaveChangesAsync();
-                        // Redirigir a la acción Index después de la eliminación
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        // Si no se encuentra la actividad, devolver un error
-                        return NotFound();
-                    }
+                    // Cambiar el estado de la actividad a inactivo (status = 0) y reprogramado
+                    activity.Status = 0;
+                    activity.StateActivity = "Reprogramado";
+
+                    // Guardar los cambios en la base de datos
+                    await _context.SaveChangesAsync();
+
+                    // Redirigir a la acción Index después de la eliminación
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    // Si no se encuentra la actividad, devolver un error 404
+                    return NotFound();
                 }
             }
             catch (Exception ex)
             {
                 // Manejar cualquier excepción que ocurra durante el proceso de eliminación
                 ModelState.AddModelError("", "Ocurrió un error al eliminar la actividad. Por favor, inténtalo de nuevo.");
-                // Puedes agregar registros de errores a tus registros de aplicación para su posterior análisis
+                // Registrar el error (puedes usar un logger si lo tienes configurado)
                 //_logger.LogError(ex, "Error al eliminar la actividad.");
+
+                // Redirigir a Index para evitar que la aplicación se quede en un estado incorrecto
                 return RedirectToAction(nameof(Index));
             }
         }
+
 
         //NTOFICACION
         private async Task ScheduleNotification(Activity activity)
@@ -338,35 +342,37 @@ namespace ProyectoColProfesionales.Controllers
         {
             try
             {
-                using (var db = new DBColProfessionalContext())
+                // Obtener la actividad por su ID usando el DbContext inyectado
+                var activity = await _context.Activities.FindAsync(id);
+
+                if (activity != null)
                 {
-                    // Obtener la actividad por su ID
-                    var activity = await db.Activities.FindAsync(id);
-                    if (activity != null)
-                    {
-                        // Cambiar el estado de la actividad a 0
-                        activity.StateActivity = "Finalizado";
-                        // Guardar los cambios en la base de datos
-                        await db.SaveChangesAsync();
-                        // Redirigir a la acción Index después de la eliminación
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        // Si no se encuentra la actividad, devolver un error
-                        return NotFound();
-                    }
+                    // Cambiar el estado de la actividad a "Finalizado"
+                    activity.StateActivity = "Finalizado";
+
+                    // Guardar los cambios en la base de datos
+                    await _context.SaveChangesAsync();
+
+                    // Redirigir a la acción Index después del cambio de estado
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    // Si no se encuentra la actividad, devolver un error 404
+                    return NotFound();
                 }
             }
             catch (Exception ex)
             {
-                // Manejar cualquier excepción que ocurra durante el proceso de eliminación
+                // Manejar cualquier excepción que ocurra durante el proceso de actualización
                 ModelState.AddModelError("", "Ocurrió un error al cambiar el estado de la actividad. Por favor, inténtalo de nuevo.");
                 // Puedes agregar registros de errores a tus registros de aplicación para su posterior análisis
-                //_logger.LogError(ex, "Error al eliminar la actividad.");
+                //_logger.LogError(ex, "Error al cambiar el estado de la actividad.");
+
                 return RedirectToAction(nameof(Index));
             }
         }
+
 
         // GET: Activity/Edit/5
         public async Task<IActionResult> Edit(int? id)
