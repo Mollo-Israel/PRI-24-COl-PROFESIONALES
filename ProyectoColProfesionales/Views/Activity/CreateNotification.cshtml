@@ -5,35 +5,69 @@
 <link rel="stylesheet" href="~/css/notifications.css" />
 
 <h2 class="notification-header">Notificación de Asistencia</h2>
-<p class="center-text">Recordatorios predeterminados:</p>
-
-<div class="reminders-container">
-    <div class="reminders">
-        <span>1.Presentación 14/09/2025</span>
-        <span>2.La presentación es a las 12:00</span>
-        <span>3.No olvides la presentación</span>
-    </div>
-    <button class="select-button">Seleccionar recordatorios</button>
-</div>
 
 <div class="message-container">
-    <label for="custom-message">Mensaje personalizado:</label>
-    <input type="text" id="custom-message" class="message-input" placeholder="Escribe tu mensaje aquí" />
+    <form asp-action="SendWhatsAppMessage" asp-controller="Notifications" method="post">
+        <label>Recordatorios:</label>
+        <div class="reminder-options">
+            <div>
+                <input type="radio" id="reminder1" name="SelectedReminder" value="Tienes defensa hoy" />
+                <label for="reminder1">Tienes defensa hoy</label>
+            </div>
+            <div>
+                <input type="radio" id="reminder2" name="SelectedReminder" value="Tienes defensa mañana" />
+                <label for="reminder2">Tienes defensa mañana</label>
+            </div>
+            <div>
+                <input type="radio" id="reminder3" name="SelectedReminder" value="Tienes defensa" />
+                <label for="reminder3">Tienes defensa</label>
+            </div>
+            <div>
+                <input type="radio" id="none" name="SelectedReminder" value="ninguno" checked />
+                <label for="none">Ninguno</label>
+            </div>
+        </div>
 
-    <div class="side-by-side-container">
+        <div class="input-group">
+            <label for="country-code">Código de País</label>
+            <select id="country-code" asp-for="CountryCode">
+                <option value="+591">Bolivia (+591)</option>
+                <option value="+56">Chile (+56)</option>
+                <option value="+54">Argentina (+54)</option>
+                <option value="+57">Colombia (+57)</option>
+                <option value="+1">Estados Unidos (+1)</option>
+                <option value="+52">México (+52)</option>
+                <!-- Agrega más opciones según sea necesario -->
+            </select>
+            @Html.ValidationMessageFor(model => model.CountryCode)
+        </div>
+
         <div class="input-group">
             <label for="phone">Teléfono</label>
-            <input type="number" id="phone" class="message-input" placeholder="" />
+            <input type="tel" id="phone" asp-for="Phone" placeholder="Ej. 71234567" required />
+            @Html.ValidationMessageFor(model => model.Phone)
         </div>
+
         <div class="input-group">
-            <label for="profession">Profesión</label>
-            <input type="text" id="profession" class="message-input" placeholder="" />
+            <label for="scheduled-date">Fecha</label>
+            <input type="date" id="scheduled-date" asp-for="ScheduledDate" required />
+            @Html.ValidationMessageFor(model => model.ScheduledDate)
         </div>
-    </div>
 
-    <button class="save-message-button">Guardar mensaje</button>
+        <div class="input-group">
+            <label for="scheduled-time">Hora</label>
+            <input type="time" id="scheduled-time" asp-for="ScheduledTime" required />
+            @Html.ValidationMessageFor(model => model.ScheduledTime)
+        </div>
 
-    <div class="action-buttons">
-        <button class="program-button">Programar</button>
-        <button class="cancel-button">Cancelar</button>
-    </div>
+        <div class="input-group">
+            <label for="custom-message">Mensaje personalizado:</label>
+            <input type="text" id="custom-message" asp-for="CustomMessage" placeholder="Escribe tu mensaje aquí" />
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" class="program-button">Enviar Mensaje</button>
+            <button type="button" class="cancel-button" onclick="window.history.back();">Cancelar</button>
+        </div>
+    </form>
+</div>
