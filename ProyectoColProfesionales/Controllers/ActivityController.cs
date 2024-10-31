@@ -40,6 +40,53 @@ namespace ProyectoColProfesionales.Controllers
             _wordProcessor = new WordProcessor();
             _directoryPath = Path.Combine(_env.WebRootPath, "templates") + "\\";
         }
+
+
+        [HttpGet]
+        public IActionResult EditActivity(int id)
+        {
+            // Recuperar la actividad desde la base de datos, incluyendo solo los campos requeridos
+            var activity = _context.Activities
+                .Where(a => a.IdActivity == id)
+                .Select(a => new ActivityModel
+                {
+                    idActivity = a.IdActivity,
+                    description = a.Description,
+                    auditorium = a.Auditorium,
+                    dateActivity = a.DateActivity,
+                    place = a.Place,
+                    idThesis = a.IdThesis,
+                    ProfessionalsAndPersons = a.ActivityProfessionals.Select(p => p.IdProfessional).ToArray()
+                })
+                .FirstOrDefault();
+
+            if (activity == null)
+            {
+                return NotFound();
+            }
+
+            // Cargar las tesis disponibles y asignarlas a ViewBag
+            ViewBag.AvailableTheses = _context.Theses
+                .Where(t => t.Status == 1)
+                .Select(t => new SelectListItem
+                {
+                    Value = t.IdThesis.ToString(),
+                    Text = t.Description
+                })
+                .ToList();
+
+            // Crear la lista de profesionales y personas, similar a lo que hiciste en Create
+            ViewBag.ProfessionalsAndPersons = (from p in _context.Professionals
+                                               join per in _context.People on p.IdPerson equals per.IdPerson
+                                               select new SelectListItem
+                                               {
+                                                   Value = p.IdProfessional.ToString(),
+                                                   Text = $"{per.Names} {per.Lastname}"
+                                               }).ToList();
+
+            return View(activity);
+        }
+
         // Nueva acción para mostrar la vista de Notificación de Asistencia
         [HttpPost]
         public async Task<IActionResult> CreateNotification(int id)

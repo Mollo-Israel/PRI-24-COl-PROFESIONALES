@@ -1,0 +1,77 @@
+﻿@model ProyectoColProfesionales.Models.ActivityModel
+@{
+    ViewData["Title"] = "Editar Actividad";
+}
+<link rel="stylesheet" href="~/css/defenseForms.css" />
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/css/multi-select-tag.css">
+<script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@3.0.1/dist/js/multi-select-tag.js"></script>
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="EditActivity" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <!-- Campo de descripción -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="description" class="control-label">Descripción</label>
+                <input asp-for="description" class="form-control" placeholder="Descripción" />
+                <span asp-validation-for="description" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Campo de auditorio -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="auditorium" class="control-label">Auditorio</label>
+                <input asp-for="auditorium" class="form-control" placeholder="Auditorio" />
+                <span asp-validation-for="auditorium" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Campo de fecha y hora de la defensa -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="dateActivity" class="control-label">Fecha y Hora de la Defensa</label>
+                <input asp-for="dateActivity" class="form-control" placeholder="Fecha y Hora de la Actividad" />
+                <span asp-validation-for="dateActivity" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Campo de ubicación -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="place" class="control-label">Ubicación</label>
+                <input asp-for="place" class="form-control" placeholder="Ubicación" />
+                <span asp-validation-for="place" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campo de proyecto (tesis) -->
+    <div class="form-group">
+        <label asp-for="idThesis" class="control-label">Proyecto</label>
+        <select asp-for="idThesis" class="form-control" asp-items="ViewBag.AvailableTheses">
+        </select>
+        <span asp-validation-for="idThesis" class="text-danger"></span>
+    </div>
+
+    <!-- Campo de tribunal (selección de profesionales) -->
+    <div class="form-group">
+        <label for="ProfessionalsAndPersons">Tribunal</label>
+        <select asp-for="ProfessionalsAndPersons" multiple class="form-control" id="ProfessionalsAndPersons" asp-items="ViewBag.ProfessionalsAndPersons">
+        </select>
+        <span asp-validation-for="ProfessionalsAndPersons" class="text-danger"></span>
+    </div>
+
+
+
+    <!-- Botones de acción -->
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="btn btn-secondary">Cancelar</button>
+    </div>
+</form>
+

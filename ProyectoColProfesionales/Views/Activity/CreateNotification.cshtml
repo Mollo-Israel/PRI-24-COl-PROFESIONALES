@@ -24,7 +24,7 @@
     <div class="side-by-side-container">
         <div class="input-group">
             <label for="profession">Nombre Completo</label>
-            <input type="text" id="profession" class="message-input"
+            <input type="text" id="profession" class="message-input" readonly
                    value="@(
                         Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Names
                         + " " +
@@ -35,7 +35,7 @@
         </div>
         <div class="input-group">
             <label for="phone">Teléfono</label>
-            <input type="text" id="phone" class="message-input"
+            <input type="text" id="phone" class="message-input" readonly
                    value="@Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.PhoneNumber" />
         </div>
     </div>
