@@ -1,0 +1,155 @@
+﻿@model IEnumerable<ProyectoColProfesionales.Models.DB1.Activity>
+
+<link href="~/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row">
+            <div class="col-md-10"><h6 class="m-0 font-weight-bold text-primary">Defensas</h6></div>
+            <div class="col-md-2" style="justify-items:end">
+                <a asp-action="Create" class="btn btn-success btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span class="text">Programar defensa</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Día de la Actividad</th>
+                        <th>Auditorio</th>
+                        <th>Dirección</th>
+                        <th>Estado</th>
+                        <th>Comprobante de Asistencia</th>
+                        <th>Comprobante de Pago</th>
+                        <th>Acción</th>
+                        <th>Comprobantes</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DateActivity)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Auditorium)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Place)
+                            </td>
+                            
+                            <td>
+                                @Html.DisplayFor(modelItem => item.StateActivity)
+                            </td>
+                            <td>
+                                @(item.HasAssistance != null && item.HasAssistance.Value ? "Si" : "No")
+                            </td>
+                            <td>
+                                @(item.HasPayment != null && item.HasPayment.Value ? "Si" : "No")
+                            </td>
+
+                       
+                      @*       <td>
+                                @using (Html.BeginForm("Delete", "Activity", new { id = item.IdActivity }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger" style="margin: 5px 5px;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                }
+                            </td>
+                            <td>
+                                @using (Html.BeginForm("ChangeStatus", "Activity", new { id = item.IdActivity }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success" style="margin: 5px 5px;">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                }
+                            </td> *@
+                            
+                            <td style="display: flex;">
+                                @using (Html.BeginForm("Delete", "Activity", new { id = item.IdActivity }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger deleteButton" style="margin: 5px 5px;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                }
+                                @using (Html.BeginForm("ChangeStatus", "Activity", new { id = item.IdActivity }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success" style="margin: 5px 5px;">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                }
+                                <a asp-action="CreateNotification" asp-route-id="@item.IdActivity" class="btn btn-warning" style="margin: 5px 5px;">
+                                    <i class="fas fa-bell"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.IdActivity" class="btn btn-primary">
+                                    <i class="fas fa-file-invoice"></i> <!-- Ícono de comprobante de pago -->
+                                    <i class="fas fa-user-check"></i> <!-- Ícono de asistencia -->
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable({
+                language: {
+                    //"decimal": "",
+                    "emptyTable": "No hay información",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+                    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+                    "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "Mostrar _MENU_ Entradas",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "Sin resultados encontrados",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Ultimo",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                }
+            });
+            // Añadir evento click para botones de eliminación con confirmación
+            $('.deleteButton').click(function (e) {
+                e.preventDefault();
+                var form = $(this).closest('form');
+                var confirmation = confirm('¿Estás seguro de que quieres eliminar esta actividad?');
+                if (confirmation) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
+    
+}

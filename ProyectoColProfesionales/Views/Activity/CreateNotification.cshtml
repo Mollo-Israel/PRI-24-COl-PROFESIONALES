@@ -1,0 +1,169 @@
+﻿@model ProyectoColProfesionales.Models.NotificationModel
+@{
+    ViewData["Title"] = "Notificación de Asistencia";
+}
+
+<link rel="stylesheet" href="~/css/notifications.css" />
+
+<h2 class="notification-header">Notificación de Asistencia</h2>
+<p class="center-text">Recordatorios predeterminados:</p>
+
+<div class="reminders-container">
+    <div class="reminders">
+        <span>Fecha de la actividad: @Model.DateActivity.ToString("dd/MM/yyyy")</span>
+        <span>Hora de la actividad: @Model.DateActivity.ToString("HH:mm")</span>
+        <span>3. No olvides la presentación</span>
+    </div>
+    <button class="select-button" id="select-button" onclick="seleccionarRecordatorios()">Seleccionar recordatorios</button>
+</div>
+
+<div class="message-container">
+    <label for="custom-message">Mensaje personalizado:</label>
+    <input type="text" id="custom-message" class="message-input" placeholder="Escribe tu mensaje aquí"
+           oninput="onInputMessage()" />
+
+    <div class="side-by-side-container">
+        <div class="input-group">
+            <label for="profession">Nombre Completo</label>
+            <input type="text" id="profession" class="message-input"
+                   value="@(
+                        Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Names
+                        + " " +
+                        Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Lastname
+                        + " " +
+                        (Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.SecondLastName ?? "")
+                   )" />
+        </div>
+        <div class="input-group">
+            <label for="phone">Teléfono</label>
+            <input type="text" id="phone" class="message-input"
+                   value="@Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.PhoneNumber" />
+        </div>
+    </div>
+    <div class="d-flex justify-content-center">
+        <button id="save-button" class="save-message-button text-center" onclick="guardarMensaje()">Guardar mensaje</button>
+    </div>
+
+
+    <div class="action-buttons">
+        <form asp-action="CreateNotification" method="post">
+            <input type="hidden" id="mensajesRecordatorios" name="mensajesRecordatorios" />
+            <input type="hidden" name="customMessage" id="customMessage" />
+            <button type="submit" class="btn btn-primary" id="program-button" disabled>Programar</button>
+        </form>
+        <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="cancel-button">Cancelar</button>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        let recordatoriosSeleccionados = false;
+        let mensajePersonalizadoSeleccionado = false;
+
+        function resetState() {
+            document.getElementById("custom-message").disabled = false;
+            document.getElementById("save-button").disabled = false;
+            document.getElementById("select-button").disabled = false;
+
+            document.getElementById("custom-message").classList.remove("disabled");
+            document.getElementById("save-button").classList.remove("disabled");
+            document.getElementById("select-button").classList.remove("disabled");
+
+            document.getElementById("program-button").disabled = true;
+        }
+
+        let typingTimer;
+        const doneTypingInterval = 600;
+
+        function onInputMessage() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(eliminarDoblesEspacios, doneTypingInterval);
+        }
+
+        function seleccionarRecordatorios() {
+            // Verificamos si los recordatorios están seleccionados
+            if (recordatoriosSeleccionados) {
+                // Restablecemos el estado
+                resetState();
+                mostrarNotificacion("Mensajes eliminados.");
+
+                // Cambiamos la variable de estado para permitir la siguiente selección
+                recordatoriosSeleccionados = false;
+            } else {
+                // Bloqueamos los otros elementos si se seleccionan los recordatorios
+                document.getElementById("custom-message").disabled = true;
+                document.getElementById("save-button").disabled = true;
+
+                document.getElementById("custom-message").classList.add("disabled");
+                document.getElementById("save-button").classList.add("disabled");
+
+                // Establecemos el valor de los recordatorios en el campo oculto y mostramos notificación
+                var mensajes = "Fecha de la actividad: " + "@Model.DateActivity.ToString("dd/MM/yyyy")" +
+                    " - Hora de la actividad: " + "@Model.DateActivity.ToString("HH:mm")" +
+                    " - No olvides la presentación.";
+                document.getElementById("mensajesRecordatorios").value = mensajes;
+
+                mostrarNotificacion("Recordatorios guardados.");
+                recordatoriosSeleccionados = true;
+
+                // Activamos el botón programar
+                document.getElementById("program-button").disabled = false;
+            }
+        }
+
+
+        function guardarMensaje() {
+            if (mensajePersonalizadoSeleccionado) {
+                resetState();
+                mostrarNotificacion("Mensaje personalizado eliminado.", 'success');
+                mensajePersonalizadoSeleccionado = false;
+                return;
+            }
+
+            document.getElementById("select-button").disabled = true;
+            document.getElementById("select-button").classList.add("disabled");
+
+            var mensaje = document.getElementById("custom-message").value.trim();
+            var errorMessage = "";
+
+            if (mensaje === "") {
+                errorMessage = "El mensaje personalizado no puede estar vacío.";
+            } else if (mensaje.length < 5) {
+                errorMessage = "El mensaje debe tener al menos 5 caracteres.";
+            } else if (mensaje.length > 200) {
+                errorMessage = "El mensaje no puede exceder los 200 caracteres.";
+            }
+
+            if (errorMessage) {
+                mostrarNotificacion(errorMessage, 'error'); // Notificación en rojo
+                return;
+            }
+
+            document.getElementById("customMessage").value = mensaje;
+            mostrarNotificacion("Mensaje personalizado guardado.", 'success'); // Notificación en verde
+            mensajePersonalizadoSeleccionado = true;
+
+            document.getElementById("program-button").disabled = false;
+        }
+
+
+        function eliminarDoblesEspacios() {
+            var input = document.getElementById("custom-message");
+            input.value = input.value.replace(/\s+/g, ' ').trim();
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            const notification = document.createElement('div');
+            notification.className = `notification visible ${tipo}`; // Usa 'success' o 'error' según corresponda
+            notification.textContent = mensaje;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.remove('visible');
+                document.body.removeChild(notification);
+            }, 2000);
+        }
+
+
+
+    </script>
+}

@@ -1,0 +1,76 @@
+﻿@model ProyectoColProfesionales.Models.ThesisModel
+
+@{
+    ViewData["Title"] = "Crear Tesis";
+}
+
+<h1>Formulario Proyecto</h1>
+
+<hr />
+
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="type" class="control-label">Tipo</label>
+        <select asp-for="type" class="form-control">
+            <option value="Tesis">Tesis</option>
+            <option value="Proyecto de grado">Proyecto de grado</option>
+            <option value="Trabajo dirigido">Trabajo dirigido</option>
+        </select>
+        <span asp-validation-for="type" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="description" class="control-label">Descripción</label>
+        <textarea asp-for="description" class="form-control" placeholder="Descripción"></textarea>
+        <span asp-validation-for="description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="student" class="control-label">Estudiante</label>
+        <input asp-for="student" class="form-control" placeholder="Estudiante">
+        <span asp-validation-for="student" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="career" class="control-label">Carrera</label>
+        <input asp-for="career" class="form-control" placeholder="Carrera">
+        <span asp-validation-for="career" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="thesisFile" class="control-label">Archivo de Tesis</label>
+        <input type="file" asp-for="thesisFile" class="form-control" placeholder="Archivo de Tesis" accept=".pdf">
+        <span asp-validation-for="thesisFile" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" onclick="location.href='@Url.Action("Index", "Thesis")'" class="btn btn-secondary">Cancelar</button>
+
+    </div>
+</form>
+<script>
+    function validatePDF() {
+        var fileInput = document.getElementById('fileInput');
+        var errorMessage = document.getElementById('errorMessage');
+        // Verificar si se ha seleccionado un archivo
+        if (thesisFile.files.length === 0) {
+            errorMessage.textContent = 'Por favor, seleccione un archivo.';
+            errorMessage.style.display = 'inline'; // Mostrar mensaje de error
+            return false; // Detener el envío del formulario
+        } else {
+            var file = thesisFile.files[0];
+            // Verificar si el archivo seleccionado es de tipo PDF
+            if (!file.type.match('application/pdf')) {
+                errorMessage.textContent = 'Por favor, seleccione un archivo PDF.';
+                errorMessage.style.display = 'inline'; // Mostrar mensaje de error
+                return false; // Detener el envío del formulario
+            } else {
+                errorMessage.style.display = 'none'; // Ocultar mensaje de error si se ha seleccionado un archivo PDF
+            }
+        }
+    }
+    
+</script>
+@* 
+<div>
+    <a asp-action="Index">Volver a la lista</a>
+</div>
+ *@

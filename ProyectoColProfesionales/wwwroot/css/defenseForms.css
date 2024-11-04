@@ -1,0 +1,19 @@
+.whatsapp-button-container {
+    position: absolute;
+    top: 10px; /* Ajusta según lo necesites */
+    right: 10px; /* Ajusta según lo necesites */
+    z-index: 1000; /* Asegúrate de que el botón esté por encima de otros elementos */
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-block;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
