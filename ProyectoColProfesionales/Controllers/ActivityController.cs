@@ -56,7 +56,9 @@ namespace ProyectoColProfesionales.Controllers
                     dateActivity = a.DateActivity,
                     place = a.Place,
                     idThesis = a.IdThesis,
-                    ProfessionalsAndPersons = a.ActivityProfessionals.Select(p => p.IdProfessional).ToArray()
+                    Professionals = a.ActivityProfessionals.Select(p => p.IdProfessional).FirstOrDefault(), // Obtener el primer ID profesional
+                    latitude = a.Latitude, // Recuperar latitud
+                    longitude = a.Longitude // Recuperar longitud
                 })
                 .FirstOrDefault();
 
@@ -75,17 +77,105 @@ namespace ProyectoColProfesionales.Controllers
                 })
                 .ToList();
 
-            // Crear la lista de profesionales y personas, similar a lo que hiciste en Create
-            ViewBag.ProfessionalsAndPersons = (from p in _context.Professionals
-                                               join per in _context.People on p.IdPerson equals per.IdPerson
-                                               select new SelectListItem
-                                               {
-                                                   Value = p.IdProfessional.ToString(),
-                                                   Text = $"{per.Names} {per.Lastname}"
-                                               }).ToList();
+            // Cargar todos los profesionales para el ComboBox y asignarlos a ViewBag
+            ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                              join per in _context.People on p.IdPerson equals per.IdPerson
+                                              select new SelectListItem
+                                              {
+                                                  Value = p.IdProfessional.ToString(),
+                                                  Text = $"{per.Names} {per.Lastname}"
+                                              }).ToList();
 
             return View(activity);
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditActivity(ActivityModel model)
+        {
+            // Validar que la fecha seleccionada no sea en el pasado
+            if (model.dateActivity < DateTime.Now)
+            {
+                ModelState.AddModelError("dateActivity", "La fecha de actividad debe ser posterior o igual a la fecha actual.");
+            }
+
+
+            //Si el modelo no es válido, recargar las listas y retornar la vista con el modelo actual
+            if (!ModelState.IsValid)
+            {
+                // Recargar las listas en ViewBag si el modelo no es válido
+                ViewBag.AvailableTheses = _context.Theses
+                    .Where(t => t.Status == 1)
+                    .Select(t => new SelectListItem
+                    {
+                        Value = t.IdThesis.ToString(),
+                        Text = t.Description
+                    })
+                    .ToList();
+
+                ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                                  join per in _context.People on p.IdPerson equals per.IdPerson
+                                                  select new SelectListItem
+                                                  {
+                                                      Value = p.IdProfessional.ToString(),
+                                                      Text = $"{per.Names} {per.Lastname}"
+                                                  }).ToList();
+
+                // Retornar la vista con los errores de validación
+                return View(model);
+            }
+
+            // Recuperar la actividad desde la base de datos
+            var activity = await _context.Activities.FindAsync(model.idActivity);
+            if (activity == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizar los campos de la actividad
+            activity.Description = model.description;
+            activity.Auditorium = model.auditorium;
+            activity.DateActivity = model.dateActivity;
+            activity.Place = model.place;
+            activity.IdThesis = model.idThesis;
+            activity.Latitude = model.latitude;
+            activity.Longitude = model.longitude;
+            activity.LastUpdate = DateTime.Now;
+
+            // Actualizar la relación 1 a 1 en ActivityProfessional
+            var existingRelation = _context.ActivityProfessionals
+                .FirstOrDefault(ap => ap.IdActivity == model.idActivity);
+
+            if (existingRelation != null)
+            {
+                // Actualizar el profesional existente
+                existingRelation.IdProfessional = model.Professionals;
+            }
+            else
+            {
+                // Crear una nueva relación si no existe
+                var activityProfessional = new Models.DB1.ActivityProfessional
+                {
+                    IdActivity = model.idActivity,
+                    IdProfessional = model.Professionals
+                };
+                _context.ActivityProfessionals.Add(activityProfessional);
+            }
+
+            // Guardar cambios en la base de datos
+            await _context.SaveChangesAsync();
+
+            // Redirigir al índice si la actualización fue exitosa
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
+
+
+
 
         // Nueva acción para mostrar la vista de Notificación de Asistencia
         [HttpPost]
