@@ -1,0 +1,42 @@
+﻿@model IEnumerable<ProyectoColProfesionales.Models.DB1.Notification2>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<h2>Notificaciones</h2>
+
+<p>
+    <a asp-action="Create">Crear Nueva Notificación</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mensaje</th>
+            <th>Fecha 1</th>
+            <th>Fecha 2</th>
+            <th>Fecha 3</th>
+            <th>Persona</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Message</td>
+                <td>@item.Date1?.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                <td>@item.Date2?.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                <td>@item.Date3?.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                <td>@item.Person?.Names</td>
+                <td>@item.Status</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

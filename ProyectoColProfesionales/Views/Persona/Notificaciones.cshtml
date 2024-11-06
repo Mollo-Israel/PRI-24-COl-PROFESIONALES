@@ -1,0 +1,35 @@
+﻿@model IEnumerable<ProyectoColProfesionales.Models.DB1.Notification2>
+
+@{
+    ViewData["Title"] = "Notificaciones de Persona";
+}
+@* agregado *@
+<h2>Notificaciones de @ViewData["FullName"]</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mensaje</th>
+            <th>Fecha 1</th>
+            <th>Fecha 2</th>
+            <th>Fecha 3</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var notification in Model)
+        {
+            <tr>
+                <td>@notification.Message</td>
+                <td>@notification.Date1?.ToString("dd/MM/yyyy")</td>
+                <td>@notification.Date2?.ToString("dd/MM/yyyy")</td>
+                <td>@notification.Date3?.ToString("dd/MM/yyyy")</td>
+                <td>@notification.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>
+    <a asp-action="Lista">Volver a la lista de personas</a>
+</p>
