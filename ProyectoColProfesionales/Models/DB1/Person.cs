@@ -57,8 +57,7 @@ namespace ProyectoColProfesionales.Models.DB1
         public virtual ICollection<Professional> Professionals { get; set; }
         [InverseProperty("IdPersonNavigation")]
         public virtual ICollection<User> Users { get; set; }
-
-        [InverseProperty("Person")]
+        //agregado
         public virtual ICollection<Notification2> Notifications2 { get; set; }
 
 
