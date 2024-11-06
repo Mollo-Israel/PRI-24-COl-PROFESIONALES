@@ -1,0 +1,139 @@
+﻿@model ProyectoColProfesionales.Models.ActivityModel
+@{
+    ViewData["Title"] = "Editar Actividad";
+}
+<link rel="stylesheet" href="~/css/defenseForms.css" />
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="EditActivity" asp-controller="Activity" method="post" enctype="multipart/form-data">
+    <!-- Campo oculto para el ID de actividad -->
+    <input type="hidden" asp-for="idActivity" />
+
+    <div class="row">
+        <!-- Campo de descripción -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="description" class="control-label">Descripción</label>
+                <input asp-for="description" class="form-control" placeholder="Descripción" />
+                <span asp-validation-for="description" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Campo de auditorio -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="auditorium" class="control-label">Auditorio</label>
+                <input asp-for="auditorium" class="form-control" placeholder="Auditorio" />
+                <span asp-validation-for="auditorium" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Campo de fecha y hora de la defensa -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="dateActivity" class="control-label">Fecha y Hora de la Defensa</label>
+                <input asp-for="dateActivity" class="form-control" placeholder="Fecha y Hora de la Actividad" />
+                <span asp-validation-for="dateActivity" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Campo de ubicación -->
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="place" class="control-label">Ubicación</label>
+                <input asp-for="place" class="form-control" placeholder="Ubicación" />
+                <span asp-validation-for="place" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label asp-for="idThesis" class="control-label">Proyecto</label>
+            <select asp-for="idThesis" class="form-control" asp-items="ViewBag.AvailableTheses">
+            </select>
+            <span asp-validation-for="idThesis" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Professionals" class="control-label">Tribunal</label>
+            <select asp-for="Professionals" class="form-control" asp-items="ViewBag.AvailableProfessionals">
+            </select>
+            <span asp-validation-for="Professionals" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Contenedor del mapa -->
+    <div id="mapContainer" style="width: 100%; height: 460px;"></div>
+
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label asp-for="latitude" class="control-label">Latitud</label>
+            <input asp-for="latitude" class="form-control" readonly />
+            <span asp-validation-for="latitude" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="longitude" class="control-label">Longitud</label>
+            <input asp-for="longitude" class="form-control" readonly />
+            <span asp-validation-for="longitude" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="btn btn-secondary">Cancelar</button>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?callback=loadMap" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+
+    <script>
+        var map, pin;
+
+        function loadMap() {
+            var latitude = parseFloat(document.getElementById('latitude').value) || -17.338097;
+            var longitude = parseFloat(document.getElementById('longitude').value) || -66.218838;
+
+            map = new Microsoft.Maps.Map(document.getElementById('mapContainer'), {
+                credentials: 'AgqOaEk-a82xj49nR5TlSVCRSO_tOw0yV3PSCnfUiD533uSOhRpQO5HaqzoYAmlh',
+                center: new Microsoft.Maps.Location(latitude, longitude),
+                zoom: 15
+            });
+
+            // Colocar un pin si ya existen coordenadas
+            if (latitude && longitude) {
+                pin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(latitude, longitude), { color: 'red' });
+                map.entities.push(pin);
+            }
+
+            // Agregar evento para hacer clic en el mapa
+            Microsoft.Maps.Events.addHandler(map, 'click', function (e) {
+                var location = e.location;
+
+                // Remover el pin anterior, si existe
+                if (pin) {
+                    map.entities.remove(pin);
+                }
+
+                // Crear nuevo pin
+                pin = new Microsoft.Maps.Pushpin(location, { color: 'red' });
+                map.entities.push(pin);
+
+                // Actualizar valores de latitud y longitud en los campos de entrada
+                document.getElementById('latitude').value = location.latitude.toFixed(6);
+                document.getElementById('longitude').value = location.longitude.toFixed(6);
+            });
+        }
+    </script>
+}
+

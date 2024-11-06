@@ -29,7 +29,7 @@
                         <th>Comprobante de Asistencia</th>
                         <th>Comprobante de Pago</th>
                         <th>Acción</th>
-                        <th>Comprobantes</th>
+                        <th>Notificación</th>
 
                     </tr>
                 </thead>
@@ -95,12 +95,18 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                 }
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.IdActivity" class="btn btn-primary">
-                                    <i class="fas fa-file-invoice"></i> <!-- Ícono de comprobante de pago -->
-                                    <i class="fas fa-user-check"></i> <!-- Ícono de asistencia -->
+                                <a asp-action="EditActivity" asp-controller="Activity" asp-route-id="@item.IdActivity" class="btn btn-primary" style="margin: 5px 5px;">
+                                    <i class="fas fa-edit"></i>
                                 </a>
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                @using (Html.BeginForm("CreateNotification", "Activity", new { id = item.IdActivity }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-warning" style="width: 65%; margin: 5px;">
+                                        <i class="fas fa-bell"></i> <!-- Ícono de notificación (campana) -->
+                                    </button>
+                                }
                             </td>
                         </tr>
                     }

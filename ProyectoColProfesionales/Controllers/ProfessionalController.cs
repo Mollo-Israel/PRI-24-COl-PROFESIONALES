@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProyectoColProfesionales.Models;
 using ProyectoColProfesionales.Models.DB1;
 
 namespace ProyectoColProfesionales.Controllers
@@ -64,7 +66,7 @@ namespace ProyectoColProfesionales.Controllers
         {
             if (ModelState.IsValid)
             {
-                var person = new Person
+                var person = new Models.DB1.Person
                 {
                     Names = form.Names,
                     Lastname = form.Lastname,
@@ -79,7 +81,7 @@ namespace ProyectoColProfesionales.Controllers
                 _context.People.Add(person);
                 await _context.SaveChangesAsync();
 
-                var professional = new Professional
+                var professional = new Models.DB1.Professional
                 {
                     Code = form.Code, // O cualquier otra lógica para definir el UserName
                     University = form.University, // Deberías tener una manera segura de establecer contraseñas
@@ -117,5 +119,94 @@ namespace ProyectoColProfesionales.Controllers
 
             return RedirectToAction(nameof(ListP));
         }
+
+
+        public async Task<IActionResult> EditP(int idProfesional)
+        {
+            var profesional = await _context.Professionals
+                                            .Where(p => p.IdProfessional == idProfesional)
+                                            .Select(p => new ProfesionalModel
+                                            {
+                                                IdPerson = p.IdPerson,
+                                                Names = p.IdPersonNavigation.Names,
+                                                Lastname = p.IdPersonNavigation.Lastname,
+                                                SecondLastName = p.IdPersonNavigation.SecondLastName,
+                                                IdentityNumber = p.IdPersonNavigation.IdentityNumber,
+                                                PhoneNumber = p.IdPersonNavigation.PhoneNumber,
+                                                Email = p.IdPersonNavigation.Email,
+                                                RegisterDate = p.RegisterDate,
+                                                LastUpdate = p.LastUpdate,
+                                                Status = p.Status,
+                                                Code = p.Code,
+                                                University = p.University,
+                                                Career = p.Career,
+                                                Specialty = p.Specialty
+                                            }).FirstOrDefaultAsync();
+
+            if (profesional == null)
+            {
+                return NotFound();
+            }
+
+            // Pasar el IdProfessional a la vista usando ViewBag
+            ViewBag.IdProfessional = idProfesional;
+
+            return View(profesional);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditP(Models.ProfesionalModel form, int idProfesional)
+        {
+            if (!ModelState.IsValid)  // Verificar si el ModelState es inválido
+            {
+                // Depurar los errores de ModelState
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error.ErrorMessage); // O puedes usar logging en tu aplicación para registrar los errores
+                }
+
+                // Devolver la vista con el modelo en caso de error
+                return View(form);
+            }
+
+            // Si el ModelState es válido, procede a realizar la actualización
+            var professional = await _context.Professionals
+                                             .Include(p => p.IdPersonNavigation)
+                                             .FirstOrDefaultAsync(p => p.IdProfessional == idProfesional);
+
+            if (professional == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizar los datos de la persona
+            var person = professional.IdPersonNavigation;
+            person.Names = form.Names;
+            person.Lastname = form.Lastname;
+            person.SecondLastName = form.SecondLastName;
+            person.IdentityNumber = form.IdentityNumber;
+            person.PhoneNumber = form.PhoneNumber; // Actualizar teléfono
+            person.Email = form.Email; // Actualizar email
+            person.LastUpdate = DateTime.Now;
+
+            // Actualizar los datos del profesional
+            professional.Code = form.Code;
+            professional.University = form.University;
+            professional.Career = form.Career;
+            professional.Specialty = form.Specialty;
+            professional.LastUpdate = DateTime.Now;
+
+            // Guardar los cambios en la base de datos
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ListP));
+        }
+
+
+
+
     }
 }
