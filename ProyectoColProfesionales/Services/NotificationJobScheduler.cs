@@ -71,7 +71,7 @@ public class NotificationJobScheduler : IHostedService, IDisposable
             {
                 driver.Navigate().GoToUrl($"https://web.whatsapp.com/send?phone={fullPhoneNumber}&text={Uri.EscapeDataString(message)}");
 
-                await Task.Delay(60000); // Espera para cargar WhatsApp Web y el mensaje
+                await Task.Delay(120000); // Espera para cargar WhatsApp Web y el mensaje
 
                 var sendButton = driver.FindElement(By.CssSelector("span[data-icon='send']"));
                 sendButton.Click();
@@ -84,7 +84,7 @@ public class NotificationJobScheduler : IHostedService, IDisposable
             }
             finally
             {
-                await Task.Delay(5000); // Espera antes de cerrar el navegador
+                await Task.Delay(60000); // Espera antes de cerrar el navegador
                 driver.Quit();
             }
         }
