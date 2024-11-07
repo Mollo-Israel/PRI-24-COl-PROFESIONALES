@@ -100,13 +100,10 @@
                                 </a>
                             </td>
                             <td style="text-align: center; vertical-align: middle;">
-                                @using (Html.BeginForm("CreateNotification", "Activity", new { id = item.IdActivity }, FormMethod.Post))
-                                {
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-warning" style="width: 65%; margin: 5px;">
-                                        <i class="fas fa-bell"></i> <!-- Ícono de notificación (campana) -->
-                                    </button>
-                                }
+                                <!-- Cambia a un enlace para redirigir a la creación de notificaciones en Notification2 -->
+                                <a asp-action="Create" asp-controller="Notification2" asp-route-id="@item.IdActivity" class="btn btn-warning" style="margin: 5px 5px;">
+                                    <i class="fas fa-bell"></i>
+                                </a>
                             </td>
                         </tr>
                     }
