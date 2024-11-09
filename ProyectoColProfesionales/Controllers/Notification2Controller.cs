@@ -52,6 +52,13 @@ namespace ProyectoColProfesionales.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Message,Date1,Date2,Date3,Status,IdPerson")] Notification2 notification2)
         {
+            // Validar que la fecha seleccionada no sea en el pasado
+            if (notification2.Date1 < DateTime.Now || notification2.Date2 < DateTime.Now || notification2.Date3 < DateTime.Now)
+            {
+                ModelState.AddModelError("Date1", "La fechas de actividad debe ser posterior o igual a la fecha actual.");
+            }
+
+
             // Validar que al menos una fecha esté presente
             if (!notification2.Date1.HasValue && !notification2.Date2.HasValue && !notification2.Date3.HasValue)
             {
