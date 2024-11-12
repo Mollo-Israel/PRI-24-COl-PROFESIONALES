@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -42,21 +43,41 @@ namespace ProyectoColProfesionales.Controllers
         }
 
         // GET: Notification2/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int id)
         {
-            ViewData["IdPerson"] = new SelectList(_context.People, "IdPerson", "Names");
-            return View();
+            var activity = await _context.Activities
+               .Include(a => a.ActivityProfessionals)
+               .ThenInclude(ap => ap.IdProfessionalNavigation)
+               .ThenInclude(p => p.IdPersonNavigation) // Incluyendo los datos de la persona
+               .FirstOrDefaultAsync(a => a.IdActivity == id);
+
+            if (activity == null)
+            {
+                return NotFound();
+            }
+            var activityNotification = new ActivityNotification2();
+            activityNotification.Activity = activity;
+            return View(activityNotification);
+
+
+            //ViewData["IdPerson"] = new SelectList(_context.People, "IdPerson", "Names");
+            //return View();
         }
         // POST: Notification2/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Message,Date1,Date2,Date3,Status,IdPerson")] Notification2 notification2)
+        public async Task<IActionResult> Create([Bind("IdActivity,Message,Date1,Date2,Date3,Status,IdPerson")] ActivityNotification2 model)
         {
-            // Validar que la fecha seleccionada no sea en el pasado
-            if (notification2.Date1 < DateTime.Now || notification2.Date2 < DateTime.Now || notification2.Date3 < DateTime.Now)
-            {
-                ModelState.AddModelError("Date1", "La fechas de actividad debe ser posterior o igual a la fecha actual.");
-            }
+            Notification2 notification2 = new Notification2 
+            { 
+                Message = model.Message,
+                Date1 = model.Date1,
+                Date2 = model.Date2,
+                Date3 = model.Date3,
+                Status = model.Status,
+                IdPerson = model.IdPerson
+
+            };
 
 
             // Validar que al menos una fecha esté presente
@@ -80,8 +101,16 @@ namespace ProyectoColProfesionales.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["IdPerson"] = new SelectList(_context.People, "IdPerson", "Names", notification2.IdPerson);
-            return View(notification2);
+
+            var activity = await _context.Activities
+              .Include(a => a.ActivityProfessionals)
+              .ThenInclude(ap => ap.IdProfessionalNavigation)
+              .ThenInclude(p => p.IdPersonNavigation) // Incluyendo los datos de la persona
+              .FirstOrDefaultAsync(a => a.IdActivity == model.IdActivity);
+
+            model.Activity = activity;
+
+            return View(model);
         }
 
 

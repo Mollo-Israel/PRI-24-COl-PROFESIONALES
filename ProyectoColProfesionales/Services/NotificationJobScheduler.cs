@@ -8,6 +8,8 @@ using ProyectoColProfesionales.Models.DB1;
 using Microsoft.EntityFrameworkCore;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 
 public class NotificationJobScheduler : IHostedService, IDisposable
 {
@@ -57,7 +59,13 @@ public class NotificationJobScheduler : IHostedService, IDisposable
 
     private async Task SendWhatsAppMessage(string phoneNumber, string message)
     {
+
         var options = new ChromeOptions();
+
+
+        options.AddArgument("--user-data-dir=C:\\Users\\VALDIVIA\\AppData\\Local\\Google\\Chrome\\User Data\\SeleniumProfile");
+        options.AddArgument("--profile-directory=Default"); // Nombre del perfil a usar
+
         options.BinaryLocation = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
         options.AddArgument("--no-sandbox");
         options.AddArgument("--disable-dev-shm-usage");
@@ -71,9 +79,10 @@ public class NotificationJobScheduler : IHostedService, IDisposable
             {
                 driver.Navigate().GoToUrl($"https://web.whatsapp.com/send?phone={fullPhoneNumber}&text={Uri.EscapeDataString(message)}");
 
-                await Task.Delay(60000); // Espera para cargar WhatsApp Web y el mensaje
+                await Task.Delay(80000); // Aumenta el tiempo de espera para cargar WhatsApp Web y el mensaje
 
-                var sendButton = driver.FindElement(By.CssSelector("span[data-icon='send']"));
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+                var sendButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector("span[data-icon='send']")));
                 sendButton.Click();
 
                 Console.WriteLine($"Mensaje enviado a {fullPhoneNumber}: {message}");
