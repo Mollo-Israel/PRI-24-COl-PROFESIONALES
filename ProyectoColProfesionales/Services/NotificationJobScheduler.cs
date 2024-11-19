@@ -63,6 +63,7 @@ public class NotificationJobScheduler : IHostedService, IDisposable
         var options = new ChromeOptions();
 
 
+        
         options.AddArgument("--user-data-dir=C:\\Users\\VALDIVIA\\AppData\\Local\\Google\\Chrome\\User Data\\SeleniumProfile");
         options.AddArgument("--profile-directory=Default"); // Nombre del perfil a usar
 

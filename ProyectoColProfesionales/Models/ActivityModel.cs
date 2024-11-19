@@ -15,7 +15,7 @@ public class ActivityModel
     [Display(Name = "Fecha de Actividad")]
     [DataType(DataType.DateTime)]
     //[FutureDate(ErrorMessage = "La fecha de actividad debe ser posterior o igual a la fecha actual.")]
-    public DateTime dateActivity { get; set; } //= DateTime.Now;
+    public DateTime dateActivity { get; set; } = DateTime.Now;
 
     [Required(ErrorMessage = "El auditorio es obligatorio.")]
     [StringLength(50, ErrorMessage = "El auditorio no puede tener más de 50 caracteres.")]
@@ -49,6 +49,7 @@ public class ActivityModel
     public bool hasAssistance { get; set; }
     //[Required(ErrorMessage = "El campo es obligatorio.")]
     public bool hasPayment { get; set; }
+
     public int[]? ProfessionalsAndPersons { get; set; }
     public int Professionals { get; set; }
     //[Required(ErrorMessage = "El comprobante de asistencia es obligatorio.")]
