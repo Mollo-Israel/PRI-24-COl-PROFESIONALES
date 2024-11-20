@@ -30,6 +30,76 @@ namespace ProyectoColProfesionales.Controllers
             return View(activeTheses);
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> EditThesis(int id)
+        {
+            var thesis = await _context.Theses
+                .Where(t => t.IdThesis == id)
+                .FirstOrDefaultAsync();
+
+            if (thesis == null)
+            {
+                return NotFound();
+            }
+
+            // Crear el modelo para la vista
+            var model = new ThesisModel
+            {
+                idThesis = thesis.IdThesis,
+                type = thesis.Type,
+                description = thesis.Description,
+                student = thesis.Student,
+                career = thesis.Career
+            };
+
+            return View(model);
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditThesis(ThesisModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Imprimir los errores de validación en la consola
+                foreach (var modelState in ModelState)
+                {
+                    var field = modelState.Key;
+                    var errors = modelState.Value.Errors;
+
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"Error en el campo '{field}': {error.ErrorMessage}");
+                    }
+                }
+
+                return View(model);
+            }
+
+            var thesis = await _context.Theses
+                .Where(t => t.IdThesis == model.idThesis)
+                .FirstOrDefaultAsync();
+
+            if (thesis == null)
+            {
+                return NotFound();
+            }
+
+            thesis.Type = model.type;
+            thesis.Description = model.description;
+            thesis.Student = model.student;
+            thesis.Career = model.career;
+            thesis.LastUpdate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
         public async Task<IActionResult> Details(int id)
         {
             Thesis thesis = await _context.Theses.Where(x => x.IdThesis == id).FirstOrDefaultAsync();

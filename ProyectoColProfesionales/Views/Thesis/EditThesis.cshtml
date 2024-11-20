@@ -1,0 +1,38 @@
+﻿@model ProyectoColProfesionales.Models.ThesisModel
+
+<h1>Editar Tesis</h1>
+
+<form asp-action="EditThesis" method="post">
+    <input type="hidden" asp-for="idThesis" />
+
+    <div class="form-group">
+        <label asp-for="type" class="control-label">Tipo</label>
+        <select asp-for="type" class="form-control">
+            <option value="Tesis">Tesis</option>
+            <option value="Proyecto de grado">Proyecto de grado</option>
+            <option value="Trabajo dirigido">Trabajo dirigido</option>
+        </select>
+        <span asp-validation-for="type" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="description" class="control-label">Descripción</label>
+        <textarea asp-for="description" class="form-control"></textarea>
+        <span asp-validation-for="description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="student" class="control-label">Estudiante</label>
+        <input asp-for="student" class="form-control" />
+        <span asp-validation-for="student" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="career" class="control-label">Carrera</label>
+        <input asp-for="career" class="form-control" />
+        <span asp-validation-for="career" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Thesis")'">Cancelar</button>
+</form>

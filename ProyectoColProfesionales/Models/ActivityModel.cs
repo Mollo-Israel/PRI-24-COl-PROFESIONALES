@@ -8,7 +8,8 @@ public class ActivityModel
 
     [Required(ErrorMessage = "La descripción es obligatoria.")]
     [StringLength(50, ErrorMessage = "La descripción no puede tener más de 50 caracteres.")]
-    [RegularExpression(@"^(?!.*\s{2,})(?!\s)[a-zA-Z0-9\s]+(?<!\s)$", ErrorMessage = "La descripción no debe comenzar ni terminar con espacios y no puede contener caracteres especiales.")]
+    [RegularExpression(@"^(?!.*\s{2,})(?!\s)[a-zA-Z0-9\sáéíóúÁÉÍÓÚüÜñÑ.,]+(?<!\s)$",
+    ErrorMessage = "La descripción no debe comenzar ni terminar con espacios, no debe contener caracteres especiales excepto puntos y debe permitir acentos.")]
     public string description { get; set; }
 
     [Required(ErrorMessage = "La fecha y hora de la defensa es obligatorio.")]
@@ -19,12 +20,14 @@ public class ActivityModel
 
     [Required(ErrorMessage = "El auditorio es obligatorio.")]
     [StringLength(50, ErrorMessage = "El auditorio no puede tener más de 50 caracteres.")]
-    [RegularExpression(@"^(?!.*\s{2,})(?!\s)[a-zA-Z0-9\s]+(?<!\s)$", ErrorMessage = "El auditorio no debe comenzar ni terminar con espacios y no puede contener caracteres especiales.")]
+    [RegularExpression(@"^(?!.*\s{2,})(?!\s)[a-zA-Z0-9\sáéíóúÁÉÍÓÚüÜñÑ.,]+(?<!\s)$",
+    ErrorMessage = "El auditorio no debe comenzar ni terminar con espacios, no debe contener caracteres especiales excepto puntos y debe permitir acentos.")]
     public string auditorium { get; set; }
 
     [Required(ErrorMessage = "La ubicación es obligatoria.")]
     [StringLength(50, ErrorMessage = "La ubicación no puede tener más de 50 caracteres.")]
-    [RegularExpression(@"^(?!.*\s{2,})(?!\s)[a-zA-Z0-9\s]+(?<!\s)$", ErrorMessage = "La ubicación no debe comenzar ni terminar con espacios y no puede contener caracteres especiales.")]
+    [RegularExpression(@"^(?!.*\s{2,})(?!\s)[a-zA-Z0-9\sáéíóúÁÉÍÓÚüÜñÑ.,]+(?<!\s)$",
+    ErrorMessage = "La ubicación no debe comenzar ni terminar con espacios, no debe contener caracteres especiales excepto puntos y debe permitir acentos.")]
     public string place { get; set; }
 
     [Required(ErrorMessage = "El proyecto es obligatorio.")]

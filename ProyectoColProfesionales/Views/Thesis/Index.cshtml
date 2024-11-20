@@ -68,15 +68,19 @@
                                 @Html.DisplayFor(modelItem => item.RegisterDate)
                             </td>
                             <td style="display: flex">
-                          
-                                <button type="button" class="btn btn-primary" onclick="window.location.href='@Url.Action("Details", new { id = item.IdThesis })'" style="margin: 5px 5px;">
-                                    <i class="fas fa-eye"></i> <!-- Icono de un ojo -->
-                                </button>
+
+
+                                <a asp-action="EditThesis" asp-controller="Thesis" asp-route-id="@item.IdThesis" class="btn btn-primary" style="margin: 5px 5px;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
                                 <button type="button" class="btn btn-danger deleteButton" data-id="@item.IdThesis" style="margin: 5px 5px;">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
 
-
+                                <button type="button" class="btn btn-primary" onclick="window.location.href='@Url.Action("Details", new { id = item.IdThesis })'" style="margin: 5px 5px;">
+                                    <i class="fas fa-eye"></i> <!-- Icono de un ojo -->
+                                </button>
 
                             </td>
                      

@@ -43,10 +43,11 @@ public class ProfesionalModel
     public string PhoneNumber { get; set; } = null!;
 
     [Column("email")]
-    [StringLength(60)]
+    [StringLength(60, ErrorMessage = "El correo electrónico no puede tener más de 60 caracteres.")]
     [Unicode(false)]
     [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
-    [RegularExpression(@"^(?!.*\s{2,})([a-zA-Z0-9@.]+)$", ErrorMessage = "El correo electrónico solo puede contener letras, números, @ y puntos, y no puede tener espacios adicionales.")]
+    [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+        ErrorMessage = "El correo electrónico debe ser válido y contener el símbolo '@'.")]
     public string? Email { get; set; }
 
     [Column("registerDate", TypeName = "datetime")]
