@@ -34,6 +34,8 @@ namespace ProyectoColProfesionales.Models.DB1
         public virtual DbSet<Thesis> Theses { get; set; } = null!;
         public virtual DbSet<ThesisFile> ThesisFiles { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
+        //agregado
+        public virtual DbSet<Notification2> Notifications2 { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -166,8 +168,25 @@ namespace ProyectoColProfesionales.Models.DB1
                     .HasConstraintName("FK_User_Person");
             });
 
+            //agregado
+            modelBuilder.Entity<Notification2>(entity =>
+            {
+                entity.HasOne(n => n.Person)
+                      .WithMany(p => p.Notifications2)
+                      .HasForeignKey(n => n.IdPerson)
+                      .OnDelete(DeleteBehavior.ClientSetNull)
+                      .HasConstraintName("FK_Notification2_Person");
+
+                entity.Property(n => n.Status)
+                      .HasDefaultValue(1)
+                      .ValueGeneratedOnAdd(); // Se asegura que el valor predeterminado de Status sea 1
+            });
+            //agregado
+            base.OnModelCreating(modelBuilder);
+
             OnModelCreatingPartial(modelBuilder);
         }
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }

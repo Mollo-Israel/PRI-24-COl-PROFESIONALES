@@ -1,7 +1,8 @@
-﻿@model ProyectoColProfesionales.Models.NotificationModel
+@model ProyectoColProfesionales.Models.DB1.Activity
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Notificación de Asistencia";
 }
+
 <link rel="stylesheet" href="~/css/notifications.css" />
 
 <h2 class="notification-header">Notificación de Asistencia</h2>
@@ -9,9 +10,9 @@
 
 <div class="reminders-container">
     <div class="reminders">
-        <span>1.Presentación 14/09/2025</span>
-        <span>2.La presentación es a las 12:00</span>
-        <span>3.No olvides la presentación</span>
+        <span>Fecha de la actividad: @Model.DateActivity.ToString("dd/MM/yyyy")</span>
+        <span>Hora de la actividad: @Model.DateActivity.ToString("HH:mm")</span>
+        <span>3. No olvides la presentación</span>
     </div>
     <button class="select-button">Seleccionar recordatorios</button>
 </div>
@@ -22,18 +23,31 @@
 
     <div class="side-by-side-container">
         <div class="input-group">
-            <label for="phone">Teléfono</label>
-            <input type="number" id="phone" class="message-input" placeholder="" />
+            <label for="profession">Nombre Completo</label>
+            <input type="text" id="profession" class="message-input" readonly
+                   value="@(
+                        Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Names
+                        + " " +
+                        Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Lastname
+                        + " " +
+                        (Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.SecondLastName ?? "")
+                   )" />
         </div>
         <div class="input-group">
-            <label for="profession">Profesión</label>
-            <input type="text" id="profession" class="message-input" placeholder="" />
+            <label for="phone">Teléfono</label>
+            <input type="text" id="phone" class="message-input" readonly
+                   value="@Model.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.PhoneNumber" />
         </div>
     </div>
+    <div class="d-flex justify-content-center">
+        <button class="save-message-button text-center">Guardar mensaje</button>
+    </div>
 
-    <button class="save-message-button">Guardar mensaje</button>
 
     <div class="action-buttons">
         <button class="program-button">Programar</button>
-        <button class="cancel-button">Cancelar</button>
+        <button type="button" onclick="location.href='@Url.Action("Index", "Activity")'" class="cancel-button">Cancelar</button>
+
     </div>
+
+</div>

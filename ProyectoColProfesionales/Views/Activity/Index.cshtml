@@ -29,7 +29,7 @@
                         <th>Comprobante de Asistencia</th>
                         <th>Comprobante de Pago</th>
                         <th>Acción</th>
-                        <th>Comprobantes</th>
+                        <th>Notificación</th>
 
                     </tr>
                 </thead>
@@ -95,11 +95,14 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                 }
+                                <a asp-action="EditActivity" asp-controller="Activity" asp-route-id="@item.IdActivity" class="btn btn-primary" style="margin: 5px 5px;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
                             </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.IdActivity" class="btn btn-primary">
-                                    <i class="fas fa-file-invoice"></i> <!-- Ícono de comprobante de pago -->
-                                    <i class="fas fa-user-check"></i> <!-- Ícono de asistencia -->
+                            <td style="text-align: center; vertical-align: middle;">
+                                <!-- Cambia a un enlace para redirigir a la creación de notificaciones en Notification2 -->
+                                <a asp-action="Create" asp-controller="Notification2" asp-route-id="@item.IdActivity" class="btn btn-warning" style="margin: 5px 5px;">
+                                    <i class="fas fa-bell"></i>
                                 </a>
                             </td>
                         </tr>
