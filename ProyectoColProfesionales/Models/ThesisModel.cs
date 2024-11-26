@@ -36,6 +36,11 @@ namespace ProyectoColProfesionales.Models
         public int idUserRegister { get; set; }
         public int idUserLastUpdate { get; set; }
         //[FileType(new string[] { ".pdf", ".doc", ".docx" }, ErrorMessage = "Solo se permiten archivos PDF o Word.")]
+        [Required(ErrorMessage = "El archivo de tesis es obligatorio.")]
         public Microsoft.AspNetCore.Http.IFormFile? thesisFile { get; set; }
+
+        // Campo adicional para la URL del archivo existente
+        public string? thesisFileUrl { get; set; }
+
     }
 }

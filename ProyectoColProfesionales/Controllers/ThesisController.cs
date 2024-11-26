@@ -30,11 +30,12 @@ namespace ProyectoColProfesionales.Controllers
             return View(activeTheses);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> EditThesis(int id)
         {
+            // Recuperar la tesis con su archivo asociado
             var thesis = await _context.Theses
+                .Include(t => t.ThesisFiles)
                 .Where(t => t.IdThesis == id)
                 .FirstOrDefaultAsync();
 
@@ -43,6 +44,8 @@ namespace ProyectoColProfesionales.Controllers
                 return NotFound();
             }
 
+            var thesisFile = thesis.ThesisFiles.FirstOrDefault();
+
             // Crear el modelo para la vista
             var model = new ThesisModel
             {
@@ -50,11 +53,13 @@ namespace ProyectoColProfesionales.Controllers
                 type = thesis.Type,
                 description = thesis.Description,
                 student = thesis.Student,
-                career = thesis.Career
+                career = thesis.Career,
+                thesisFileUrl = thesisFile != null ? $"/ThesisFiles/Download/{thesisFile.IdThesis}" : null // Generar URL de descarga
             };
 
             return View(model);
         }
+
 
 
 
@@ -64,22 +69,11 @@ namespace ProyectoColProfesionales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Imprimir los errores de validación en la consola
-                foreach (var modelState in ModelState)
-                {
-                    var field = modelState.Key;
-                    var errors = modelState.Value.Errors;
-
-                    foreach (var error in errors)
-                    {
-                        Console.WriteLine($"Error en el campo '{field}': {error.ErrorMessage}");
-                    }
-                }
-
                 return View(model);
             }
 
             var thesis = await _context.Theses
+                .Include(t => t.ThesisFiles)
                 .Where(t => t.IdThesis == model.idThesis)
                 .FirstOrDefaultAsync();
 
@@ -93,6 +87,28 @@ namespace ProyectoColProfesionales.Controllers
             thesis.Student = model.student;
             thesis.Career = model.career;
             thesis.LastUpdate = DateTime.Now;
+
+            // Si se subió un nuevo archivo, actualizarlo
+            if (model.thesisFile != null && model.thesisFile.Length > 0)
+            {
+                var thesisFile = thesis.ThesisFiles.FirstOrDefault();
+                if (thesisFile != null)
+                {
+                    thesisFile.DataFile = await ConvertToByteArrayAsync(model.thesisFile);
+                    thesisFile.NameFile = model.thesisFile.FileName;
+                }
+                else
+                {
+                    thesisFile = new ThesisFile
+                    {
+                        IdThesis = thesis.IdThesis,
+                        DataFile = await ConvertToByteArrayAsync(model.thesisFile),
+                        NameFile = model.thesisFile.FileName,
+                        ThesisType = "tesis"
+                    };
+                    _context.ThesisFiles.Add(thesisFile);
+                }
+            }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

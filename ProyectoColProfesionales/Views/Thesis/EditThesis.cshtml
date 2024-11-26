@@ -2,7 +2,7 @@
 
 <h1>Editar Tesis</h1>
 
-<form asp-action="EditThesis" method="post">
+<form asp-action="EditThesis" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="idThesis" />
 
     <div class="form-group">
@@ -31,6 +31,24 @@
         <label asp-for="career" class="control-label">Carrera</label>
         <input asp-for="career" class="form-control" />
         <span asp-validation-for="career" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Archivo Actual</label>
+        @if (Model.thesisFileUrl != null)
+        {
+            <p><a asp-controller="Thesis" asp-action="Download" asp-route-id="@Model.idThesis" class="btn btn-link">Descargar archivo actual</a></p>
+        }
+        else
+        {
+            <p>No hay un archivo cargado actualmente.</p>
+        }
+    </div>
+
+    <div class="form-group">
+        <label asp-for="thesisFile" class="control-label">Subir nuevo archivo</label>
+        <input asp-for="thesisFile" type="file" class="form-control" />
+        <span asp-validation-for="thesisFile" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Guardar</button>
