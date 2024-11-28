@@ -1,3 +1,21 @@
+CREATE TABLE [dbo].[Notification2]( 
+    [idNotification2] [int] IDENTITY(1,1) NOT NULL,
+    [date2] [datetime] NULL,
+    [date3] [datetime] NULL,
+    [status] [int] NOT NULL CONSTRAINT DF_Notification2_status DEFAULT 1,
+    [idPerson] [int] NOT NULL,
+    CONSTRAINT [PK_Notification2] PRIMARY KEY CLUSTERED ([idNotification2] ASC)
+);
+
+-- Foreign key for Notification2
+ALTER TABLE [dbo].[Notification2] WITH CHECK ADD CONSTRAINT [FK_Notification2_Person] FOREIGN KEY([idPerson])
+REFERENCES [dbo].[Person] ([idPerson]);
+
+-- Adding the foreign key constraint check
+ALTER TABLE [dbo].[Notification2] CHECK CONSTRAINT [FK_Notification2_Person];
+
+
+
 
 SET IDENTITY_INSERT [User] ON;
 SET ANSI_NULLS ON

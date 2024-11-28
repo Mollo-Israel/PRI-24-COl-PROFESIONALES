@@ -2,38 +2,27 @@ version: '3.4'
 
 services:
   proyectocolprofesionales:
-    image: kevineduardoalanesortega/proyectocolprofesionales:latest
+    build: .  # Esto construirá la imagen desde tu Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=GALAXY-BOOK-3-3\SQLEXPRESS;Database=DBColProfessional;User Id=sa;Password=Passw0rd;
-      - SmtpSettings__Server=smtp.gmail.com..0
-      - SmtpSettings__Port=587
-      - SmtpSettings__Username=kevin.tpa17@gmail.com
-      - SmtpSettings__Password=ktkwbunjorytvipc
-      - SmtpSettings__Sender=kevin.tpa17@gmail.com
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=DBColProfessional;User Id=sa;Password=Passw0rd;
     ports:
       - "8080:80"
-  
+    depends_on:
+      - sqlserver  # Esto asegura que el servicio de SQL Server se inicie antes
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    
     environment:
-    
       SA_PASSWORD: "Passw0rd"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
-
     volumes:
-        #esta linea de codigo es para ejecutar el .sql a el docker y se creara la base de datos 
       - ./migration/migration.sql:/migration/migration.sql
-        #es para ejecutar la segunda linea de cracion en el docker la base de datos 
       - ./migration/db.sql:/migration/db.sql
-      
-      - ./entrypoint.sh:/entrypoint.sh
       - sql_data:/var/opt/mssql
-    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]  # Ejecuta el script de inicio para crear la DB
 
 volumes:
   sql_data:
-      
