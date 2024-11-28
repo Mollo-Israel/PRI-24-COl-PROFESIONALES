@@ -10,11 +10,12 @@ Este documento describe el sistema local diseñado para gestionar y automatizar 
 El sistema permite el registro detallado de profesionales y tesis, almacenándolos en una base de datos. Genera cartas automáticas para enviar a los correos de los profesionales (tribunales) involucrados y maneja el registro de usuarios con diferentes roles y permisos.
 
 ## 3. Roles / integrantes:
-- Devon Anderson Sandoval Berrios: Desarrollador Backend, gestión de base de datos y lógica del negocio.
-- Maria Cristina Arrazola Candia: Desarrolladora Frontend, diseño de interfaz y experiencia de usuario.
+- Valdivia Rodriguez Rolando: Desarrollador Backend, gestión de base de datos y lógica del negocio.
+- Mollo Vargas Israel: Desarrollador Backend, gestión de base de datos y lógica del negocio.
+- Alanes Ortega Kevin: Desarrolladora Frontend, diseño de interfaz y experiencia de usuario.
 
 ## 4. Arquitectura del software:
-Devon Anderson Sandoval Berrios y Maria Cristina Arrazola Candia	
+Valdivia Rodriguez Rolando y Mollo Vargas Israel	
 Se utiliza ASP.NET Core 6 MVC como framework principal, siguiendo el patrón de diseño MVC (Model-View-Controller) para separar la lógica del negocio, la interfaz de usuario y el modelo de datos. La comunicación con la base de datos se realiza a través de modelos que facilitan la interacción con SQL Server 2019.
 
 ## 5. Requisitos del sistema:
@@ -103,7 +104,7 @@ Este rol es para técnicos esta por encima de los demás roles
 
 ## 8. GIT:
 - Versión final entregada del proyecto.
-Use en el visual estudio code en la terminal en View -> Terminal ir a la carpeta que estará el proyecto o abrirlo directamente en el vi “ git clone https://github.com/CB-Proyecto-Sistemas-II-2024/PR-24-COL-PROFESIONALES/tree/Devon-Anderson “
+Use en el visual estudio code en la terminal en View -> Terminal ir a la carpeta que estará el proyecto o abrirlo directamente en el vi “ git clone https://github.com/Mollo-Israel/PRI-24-COl-PROFESIONALES/tree/main “
 - Entrega de compilados y ejecutables. 
 ## 9 Dockerizado Del Sitio WEB, de la Base de Datos:
 
@@ -201,11 +202,41 @@ Creacion de las clases y dbcontext con el uso de Entityframework(Scaffold-DbCont
 Entityframework versión 6.11 para el soporte de core 6 
 Uso de mapa Bing (https://learn.microsoft.com/es-es/aspnet/web-pages/overview/ui-layouts-and-themes/displaying-maps-in-an-aspnet-web-pages-site)
 
-## 15 Herramientas de Implementación:
+## 15 Referencias y recursos adicionales (Automatización):
+Para poder usar la automatizacón de mensajes de whatsapp con selenuim primero:
+1.-Modificar el archivo NotificationJobScheduler.cs cambiando el apartado de destino de la cuenta por defecto que se usara selenium:
+ options.AddArgument("--user-data-dir=C:\\Users\\VALDIVIA\\AppData\\Local\\Google\\Chrome\\User Data\\SeleniumProfile");
+ cambiar esta ruta por la ruta que tiene definida en su computadora
+ normalmente esta ruta se encuentra en su usuario:
+ User/Nombredelusuario/appdata/local/google/chrome/userdata
+
+ la ultima dirección debe crearse una carpeta llamada SeleniumProfile, dentro de esa carpeta almacenar todo los archivos de esta ruta:
+ C:\Users\VALDIVIA\AppData\Local\Google\Chrome\User Data
+ en este caso de usted cambiara el usuario segun el nombre de su usuario de su computadora: esos archivos selecciona todos y los copia y pega en esta ruta:
+ C:\Users\VALDIVIA\AppData\Local\Google\Chrome\User Data\SeleniumProfile
+ Es decir en la carpeta que creó para selenium
+ Con esto solo debe modificar esta ruta del archivo
+ ¨NotificationJobScheduler¨ esta ruta ¨("--user-data-dir=C:\\Users\\VALDIVIA\\AppData\\Local\\Google\\Chrome\\User Data\\SeleniumProfile");¨
+ quedaria algo asi:
+ ("--user-data-dir=C:\\Users\\TUusuarioCompu\\AppData\\Local\\Google\\Chrome\\User Data\\SeleniumProfile");
+
+ y listo:
+ Las recomendaciones para usar este servicio son:
+ !!IMPORTANTE!!
+  
+ 1. no debe restaurar la ventana por defecto de Chrome es decir la ventana que no tiene ningun usuario o cuenta porque en esa ventana trabaja selenium entonces
+ 2. no debe entrar a whatsapp web en la ventana por defecto del navegador porque ahi trabaja selenium, el mismo se encarga de abrir esa ventana entonces no debe interferir
+ 3. no ponga la ventana por defecto de selenium en segundo plano debe estar desplegada pero puede estar atras de otras ventanas pero no en segundo plano porque no enviara los mensajes el bot de selenium
+
+
+
+
+
+## 16 Herramientas de Implementación:
 •	Para la plantilla del proyecto(Lenguajes de programación: C#, JavaScript.)
 •	Logica del proyecto(Frameworks: ASP.NET Core 6 MVC.)
 •	 Servicio de terceros: servicios de correo electrónico de Google, uso de mapa con Bing
-## 16  Bibliografía:
+## 17  Bibliografía:
 •	"Pro ASP.NET Core 6" por Adam Freeman.
 •	Documentación oficial de ASP.NET Core: https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-6.0
 •	Videos de youtube como ser : https://www.youtube.com/watch?v=x0MBbx7lym8&t=398s
