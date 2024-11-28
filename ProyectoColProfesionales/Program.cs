@@ -9,7 +9,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Registrar el Job Scheduler
+builder.Services.AddHostedService<NotificationJobScheduler>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

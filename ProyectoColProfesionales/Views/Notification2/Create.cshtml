@@ -1,0 +1,109 @@
+﻿@model ProyectoColProfesionales.Models.DB1.ActivityNotification2
+
+@{
+    ViewData["Title"] = "Crear Notificación";
+}
+
+<h2>Crear Notificación</h2>
+@* agregado *@
+
+<link rel="stylesheet" href="~/css/notifications.css" />
+
+
+<h2 class="notification-header">Notificación de Asistencia</h2>
+<p class="center-text">Recordatorios predeterminados:</p>
+
+<div class="reminders-container">
+    <div class="reminders">
+        <span id="activityDate">Fecha de la actividad: @Model.Activity.DateActivity.ToString("dd/MM/yyyy")</span>
+        <span id="activityTime">Hora de la actividad: @Model.Activity.DateActivity.ToString("HH:mm")</span>
+        <span id="presentationReminder">No olvides la presentación</span>
+    </div>
+    <button type="button" class="select-button" onclick="setReminderMessage()">Seleccionar recordatorios</button>
+</div>
+
+<form asp-action="Create">
+
+    <input asp-for="IdActivity" type="hidden"
+           value="@(Model.Activity.IdActivity)" />
+
+
+    <div class="form-group">
+        <label asp-for="Message" class="control-label"></label>
+        <input asp-for="Message" class="form-control" id="messageField" />
+        <span asp-validation-for="Message" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="Date1" class="control-label"></label>
+        <input class="form-control" type="datetime-local" readonly
+               value="@(Model.Activity.DateActivity.AddDays(-1).ToString("yyyy-MM-dd") + "T09:00")"
+               asp-for="Date1" />
+        <span asp-validation-for="Date1" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Date2" class="control-label"></label>
+        <input class="form-control" type="datetime-local" readonly
+               value="@(Model.Activity.DateActivity.ToString("yyyy-MM-dd") + "T00:00")"
+               asp-for="Date2" />
+        <span asp-validation-for="Date2" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Date3" class="control-label"></label>
+        <input class="form-control" type="datetime-local" readonly
+               value="@(Model.Activity.DateActivity.AddHours(-3).ToString("yyyy-MM-ddTHH:mm"))"
+               asp-for="Date3" />
+        <span asp-validation-for="Date3" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="IdPerson" class="control-label"></label>
+                <input type="text" class="form-control" readonly
+                       value="@( Model.Activity.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Names
+                            + " " + Model.Activity.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.Lastname
+                            + " " + ( Model.Activity.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.SecondLastName ?? "") )" />
+                <input asp-for="IdPerson" type="hidden"
+                       value="@(Model.Activity.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.IdPerson)" />
+                <span asp-validation-for="IdPerson" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="phone">La notificación se enviará al teléfono</label>
+                <input type="text" id="phone" class="form-control" readonly
+                       value="@Model.Activity.ActivityProfessionals.FirstOrDefault()?.IdProfessionalNavigation.IdPersonNavigation.PhoneNumber" />
+            </div>
+        </div>
+    </div>
+
+
+    <span asp-validation-for="Date1" class="text-danger"></span>
+
+    <input asp-for="Status" class="form-control" type="hidden"/>
+
+    <div class="form-group">
+        <input type="submit" value="Crear" class="btn btn-primary" />
+    </div>
+</form>
+
+<script>
+    function setReminderMessage() {
+        // Obtener los valores de las etiquetas de recordatorios
+        const activityDate = document.getElementById("activityDate").textContent;
+        const activityTime = document.getElementById("activityTime").textContent;
+        const presentationReminder = document.getElementById("presentationReminder").textContent;
+
+        // Concatenar el mensaje
+        const fullMessage = `${activityDate}\t ${activityTime}\t ${presentationReminder}`;
+
+        // Establecer el valor en el campo Message
+        document.getElementById("messageField").value = fullMessage;
+    }
+</script>
+

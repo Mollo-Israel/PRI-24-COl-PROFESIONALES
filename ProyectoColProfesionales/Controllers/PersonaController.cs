@@ -199,8 +199,22 @@ namespace ProyectoColProfesionales.Controllers
 
             return View(list);
         }
+        //agregado
+        // Nueva acción para ver las notificaciones asociadas a una persona
+        public async Task<IActionResult> Notificaciones(int idPerson)
+        {
+            var person = await _context.People
+                .Include(p => p.Notifications2) // Carga las notificaciones de la persona
+                .FirstOrDefaultAsync(p => p.IdPerson == idPerson);
 
+            if (person == null)
+            {
+                return NotFound();
+            }
 
+            ViewData["FullName"] = $"{person.Names} {person.Lastname}";
+            return View(person.Notifications2); // Envía la lista de notificaciones a la vista
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

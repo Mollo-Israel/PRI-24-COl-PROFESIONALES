@@ -9,6 +9,7 @@ namespace ProyectoColProfesionales.Models.DB1
     [Table("Activity")]
     public partial class Activity
     {
+        //ModelDBb
         public Activity()
         {
             ActivityProfessionals = new HashSet<ActivityProfessional>();

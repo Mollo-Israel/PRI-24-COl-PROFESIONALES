@@ -30,6 +30,92 @@ namespace ProyectoColProfesionales.Controllers
             return View(activeTheses);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditThesis(int id)
+        {
+            // Recuperar la tesis con su archivo asociado
+            var thesis = await _context.Theses
+                .Include(t => t.ThesisFiles)
+                .Where(t => t.IdThesis == id)
+                .FirstOrDefaultAsync();
+
+            if (thesis == null)
+            {
+                return NotFound();
+            }
+
+            var thesisFile = thesis.ThesisFiles.FirstOrDefault();
+
+            // Crear el modelo para la vista
+            var model = new ThesisModel
+            {
+                idThesis = thesis.IdThesis,
+                type = thesis.Type,
+                description = thesis.Description,
+                student = thesis.Student,
+                career = thesis.Career,
+                thesisFileUrl = thesisFile != null ? $"/ThesisFiles/Download/{thesisFile.IdThesis}" : null // Generar URL de descarga
+            };
+
+            return View(model);
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditThesis(ThesisModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var thesis = await _context.Theses
+                .Include(t => t.ThesisFiles)
+                .Where(t => t.IdThesis == model.idThesis)
+                .FirstOrDefaultAsync();
+
+            if (thesis == null)
+            {
+                return NotFound();
+            }
+
+            thesis.Type = model.type;
+            thesis.Description = model.description;
+            thesis.Student = model.student;
+            thesis.Career = model.career;
+            thesis.LastUpdate = DateTime.Now;
+
+            // Si se subió un nuevo archivo, actualizarlo
+            if (model.thesisFile != null && model.thesisFile.Length > 0)
+            {
+                var thesisFile = thesis.ThesisFiles.FirstOrDefault();
+                if (thesisFile != null)
+                {
+                    thesisFile.DataFile = await ConvertToByteArrayAsync(model.thesisFile);
+                    thesisFile.NameFile = model.thesisFile.FileName;
+                }
+                else
+                {
+                    thesisFile = new ThesisFile
+                    {
+                        IdThesis = thesis.IdThesis,
+                        DataFile = await ConvertToByteArrayAsync(model.thesisFile),
+                        NameFile = model.thesisFile.FileName,
+                        ThesisType = "tesis"
+                    };
+                    _context.ThesisFiles.Add(thesisFile);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
         public async Task<IActionResult> Details(int id)
         {
             Thesis thesis = await _context.Theses.Where(x => x.IdThesis == id).FirstOrDefaultAsync();

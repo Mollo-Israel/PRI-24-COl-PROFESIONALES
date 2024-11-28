@@ -41,6 +41,13 @@
                                 <button type="button" class="btn btn-danger deleteButton" data-id="@item.IdProfessional" style="margin: 5px 5px;">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
+
+                                <a href="@Url.Action("EditP", "Professional", new { idProfesional = item.IdProfessional })" class="btn btn-primary" style="margin: 5px 5px;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+
+
                             </td>
                         </tr>
                     }

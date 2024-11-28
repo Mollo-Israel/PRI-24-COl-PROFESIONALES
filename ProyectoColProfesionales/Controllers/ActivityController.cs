@@ -54,6 +54,168 @@ namespace ProyectoColProfesionales.Controllers
             return RedirectToAction("Index");
         }
 
+
+        [HttpGet]
+        public IActionResult EditActivity(int id)
+        {
+            // Recuperar la actividad desde la base de datos, incluyendo solo los campos requeridos
+            var activity = _context.Activities
+                .Where(a => a.IdActivity == id)
+                .Select(a => new ActivityModel
+                {
+                    idActivity = a.IdActivity,
+                    description = a.Description,
+                    auditorium = a.Auditorium,
+                    dateActivity = a.DateActivity,
+                    place = a.Place,
+                    idThesis = a.IdThesis,
+                    Professionals = a.ActivityProfessionals.Select(p => p.IdProfessional).FirstOrDefault(), // Obtener el primer ID profesional
+                    latitude = a.Latitude, // Recuperar latitud
+                    longitude = a.Longitude // Recuperar longitud
+                })
+                .FirstOrDefault();
+
+            if (activity == null)
+            {
+                return NotFound();
+            }
+
+            // Cargar las tesis disponibles y asignarlas a ViewBag
+            ViewBag.AvailableTheses = _context.Theses
+                .Where(t => t.Status == 1)
+                .Select(t => new SelectListItem
+                {
+                    Value = t.IdThesis.ToString(),
+                    Text = t.Description
+                })
+                .ToList();
+
+            // Cargar todos los profesionales para el ComboBox y asignarlos a ViewBag
+            ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                              join per in _context.People on p.IdPerson equals per.IdPerson
+                                              select new SelectListItem
+                                              {
+                                                  Value = p.IdProfessional.ToString(),
+                                                  Text = $"{per.Names} {per.Lastname}"
+                                              }).ToList();
+
+            return View(activity);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditActivity(ActivityModel model)
+        {
+            // Validar que la fecha seleccionada no sea en el pasado
+            if (model.dateActivity < DateTime.Now)
+            {
+                ModelState.AddModelError("dateActivity", "La fecha de actividad debe ser posterior o igual a la fecha actual.");
+            }
+
+
+            //Si el modelo no es válido, recargar las listas y retornar la vista con el modelo actual
+            if (!ModelState.IsValid)
+            {
+                // Recargar las listas en ViewBag si el modelo no es válido
+                ViewBag.AvailableTheses = _context.Theses
+                    .Where(t => t.Status == 1)
+                    .Select(t => new SelectListItem
+                    {
+                        Value = t.IdThesis.ToString(),
+                        Text = t.Description
+                    })
+                    .ToList();
+
+                ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                                  join per in _context.People on p.IdPerson equals per.IdPerson
+                                                  select new SelectListItem
+                                                  {
+                                                      Value = p.IdProfessional.ToString(),
+                                                      Text = $"{per.Names} {per.Lastname}"
+                                                  }).ToList();
+
+                // Retornar la vista con los errores de validación
+                return View(model);
+            }
+
+            // Recuperar la actividad desde la base de datos
+            var activity = await _context.Activities.FindAsync(model.idActivity);
+            if (activity == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizar los campos de la actividad
+            activity.Description = model.description;
+            activity.Auditorium = model.auditorium;
+            activity.DateActivity = model.dateActivity;
+            activity.Place = model.place;
+            activity.IdThesis = model.idThesis;
+            activity.Latitude = model.latitude;
+            activity.Longitude = model.longitude;
+            activity.LastUpdate = DateTime.Now;
+
+            // Actualizar la relación 1 a 1 en ActivityProfessional
+            var existingRelation = _context.ActivityProfessionals
+                .FirstOrDefault(ap => ap.IdActivity == model.idActivity);
+
+            if (existingRelation != null)
+            {
+                // Actualizar el profesional existente
+                existingRelation.IdProfessional = model.Professionals;
+            }
+            else
+            {
+                // Crear una nueva relación si no existe
+                var activityProfessional = new Models.DB1.ActivityProfessional
+                {
+                    IdActivity = model.idActivity,
+                    IdProfessional = model.Professionals
+                };
+                _context.ActivityProfessionals.Add(activityProfessional);
+            }
+
+            // Guardar cambios en la base de datos
+            await _context.SaveChangesAsync();
+
+            // Redirigir al índice si la actualización fue exitosa
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
+
+
+
+
+        // Nueva acción para mostrar la vista de Notificación de Asistencia
+        [HttpPost]
+        public async Task<IActionResult> CreateNotification(int id)
+        {
+            var activity = await _context.Activities
+                .Include(a => a.ActivityProfessionals)
+                .ThenInclude(ap => ap.IdProfessionalNavigation)
+                .ThenInclude(p => p.IdPersonNavigation) // Incluyendo los datos de la persona
+                .FirstOrDefaultAsync(a => a.IdActivity == id);
+
+            if (activity == null)
+            {
+                return NotFound();
+            }
+
+            return View(activity);
+        }
+
+        /*
+        [HttpPost]
+        public IActionResult SaveActivity(ActivityModel model)
+        {
+            // Lógica para guardar los datos del formulario y la notificación
+            return RedirectToAction("Index");
+        }
+        */
         //public IActionResult Index()
         //{
         //    List<Activity> list = new List<Activity>();
@@ -77,162 +239,294 @@ namespace ProyectoColProfesionales.Controllers
         }
 
         // GET: Activity/Create
+
+        [HttpGet]
         public IActionResult Create()
         {
             // Obtener las tesis disponibles
-            List<Thesis> availableTheses = _context.Theses.Where(t => t.Status == 1).ToList();
-            ViewBag.AvailableTheses = availableTheses;
+            ViewBag.AvailableTheses = _context.Theses
+                .Where(t => t.Status == 1)
+                .Select(t => new SelectListItem
+                {
+                    Value = t.IdThesis.ToString(),
+                    Text = t.Description
+                })
+                .ToList();
 
-            // Crear la lista de profesionales y personas
-            List<SelectListItem> professionalsAndPersons = (from p in _context.Professionals
-                                                            join per in _context.People on p.IdPerson equals per.IdPerson
-                                                            select new SelectListItem
-                                                            {
-                                                                Value = $"{p.IdProfessional}", // Usamos el Id del Profesional como valor
-                                                                Text = $"{per.Names} {per.Lastname}" // Concatenamos el nombre del Profesional y de la Persona
-                                                            }).ToList();
+            // Obtener los profesionales disponibles
+            ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                              join per in _context.People on p.IdPerson equals per.IdPerson
+                                              where p.Status == 1
+                                              select new SelectListItem
+                                              {
+                                                  Value = p.IdProfessional.ToString(),
+                                                  Text = $"{per.Names} {per.Lastname}"
+                                              }).ToList();
 
-            // Asignar la lista a ViewBag
-            ViewBag.ProfessionalsAndPersons = professionalsAndPersons;
-
-            return View();
+            return View(new ActivityModel());
         }
+
+
+
+
+        //public IActionResult Create()
+        //{
+        //    // Obtener las tesis disponibles
+        //    List<Thesis> availableTheses = _context.Theses.Where(t => t.Status == 1).ToList();
+        //    ViewBag.AvailableTheses = availableTheses;
+
+        //    // Crear la lista de profesionales y personas
+        //    List<SelectListItem> professionalsAndPersons = (from p in _context.Professionals
+        //                                                    join per in _context.People on p.IdPerson equals per.IdPerson
+        //                                                    select new SelectListItem
+        //                                                    {
+        //                                                        Value = $"{p.IdProfessional}", // Usamos el Id del Profesional como valor
+        //                                                        Text = $"{per.Names} {per.Lastname}" // Concatenamos el nombre del Profesional y de la Persona
+        //                                                    }).ToList();
+
+        //    // Asignar la lista a ViewBag
+        //    ViewBag.ProfessionalsAndPersons = professionalsAndPersons;
+
+        //    return View();
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ActivityModel activity1)
+        public async Task<IActionResult> Create(ActivityModel model)
         {
-            if (ModelState.IsValid)
+            // Validar que la fecha seleccionada no sea en el pasado
+            if (model.dateActivity < DateTime.Now)
             {
-                try
-                {
-                    // Establecer la fecha de registro y actualización
-                    activity1.registerDate = DateTime.Now;
-                    activity1.lastUpdate = DateTime.Now;
-
-                    // Crear una nueva actividad
-                    Activity activity = new Activity
-                    {
-                        Auditorium = activity1.auditorium,
-                        DateActivity = activity1.dateActivity,
-                        Description = activity1.description,
-                        HasAssistance = activity1.hasAssistance,
-                        HasPayment = activity1.hasPayment,
-                        IdThesis = activity1.idThesis,
-                        Latitude = activity1.latitude,
-                        Longitude = activity1.longitude,
-                        Status = activity1.status,
-                        StateActivity = "Pendiente",
-                        Place = activity1.place,
-                        RegisterDate = DateTime.Now
-                    };
-
-                    // Guardar la actividad en la base de datos
-                    _context.Activities.Add(activity);
-                    await _context.SaveChangesAsync();
-
-                    // Guardar el voucher asociado a la actividad
-                    if (activity1.voucherAsistenceFile != null && activity1.voucherAsistenceFile.Length > 0)
-                    {
-                        var activityVoucher = new Models.DB1.ActivityVoucher
-                        {
-                            VoucherType = "Comprobante de Asistencia",
-                            VoucherFile = await ConvertToByteArrayAsync(activity1.voucherAsistenceFile),
-                            NameFile = activity1.voucherAsistenceFile.FileName,
-                            IdActivity = activity.IdActivity
-                        };
-
-                        _context.ActivityVouchers.Add(activityVoucher);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Guardar el voucher asociado al pago
-                    if (activity1.voucherPayFile != null && activity1.voucherPayFile.Length > 0)
-                    {
-                        var activityVoucher1 = new Models.DB1.ActivityVoucher
-                        {
-                            VoucherType = "Comprobante de Pago",
-                            VoucherFile = await ConvertToByteArrayAsync(activity1.voucherPayFile),
-                            NameFile = activity1.voucherPayFile.FileName,
-                            IdActivity = activity.IdActivity
-                        };
-
-                        _context.ActivityVouchers.Add(activityVoucher1);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Guardar los profesionales asociados a la actividad
-                    if (activity1.ProfessionalsAndPersons != null)
-                    {
-                        foreach (var id in activity1.ProfessionalsAndPersons)
-                        {
-                            var activityProfessional = new Models.DB1.ActivityProfessional
-                            {
-                                IdActivity = activity.IdActivity,
-                                IdProfessional = id
-                            };
-                            _context.ActivityProfessionals.Add(activityProfessional);
-                            await _context.SaveChangesAsync();
-                        }
-                    }
-
-                    // Obtener la lista de profesionales
-                    var professionalIds = activity1.ProfessionalsAndPersons;
-                    var profesionalList = await (from p in _context.Professionals
-                                                 join per in _context.People on p.IdPerson equals per.IdPerson
-                                                 where professionalIds.Contains(p.IdProfessional)
-                                                 select per).ToListAsync();
-
-                    // Obtener información del estudiante (tesis)
-                    var thesisId = activity1.idThesis;
-                    var student = await _context.Theses.Where(x => x.IdThesis == thesisId).FirstOrDefaultAsync();
-                    string studentName = student?.Student ?? "";
-                    string studentCareer = student?.Career ?? "";
-
-                    // Preparar contenido del correo electrónico
-                    string emailContent = $"Buenas tardes,<br/><br/>Te informamos que has sido seleccionado/a para formar parte del tribunal en la próxima actividad.<br/>Fecha y hora de la actividad: {activity1.dateActivity}.<br/>Agradecemos tu colaboración y compromiso.<br/><br/>Saludos cordiales.";
-
-                    // Enviar correos electrónicos a los profesionales
-                    foreach (var itemProfesional in profesionalList)
-                    {
-                        var streamTemp = _wordProcessor.ModelLetter(_directoryPath, _templateLetter, new AttributeReplaceLetter
-                        {
-                            Carrera = studentCareer,
-                            FechaCarta = GetDateSpanish(),
-                            FechaPresentacion = GetDateTimeSpanish(activity1.dateActivity),
-                            NombrePostulante = studentName,
-                            Profesional = itemProfesional.Names + " " + itemProfesional.Lastname
-                        });
-
-                        await _emailSender.SendEmailAsync(itemProfesional.Email, "Detalles de tu cuenta", emailContent, streamTemp.memoryStream, streamTemp.NameFile);
-                    }
-
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    // Manejar cualquier excepción que ocurra durante el proceso de guardado
-                    ModelState.AddModelError("", "Ocurrió un error al guardar la actividad. Por favor, inténtalo de nuevo.");
-                }
+                ModelState.AddModelError("dateActivity", "La fecha de actividad debe ser posterior o igual a la fecha actual.");
             }
 
-            // Si hay errores de validación, recargar la vista con los datos ingresados por el usuario
-            List<Thesis> availableTheses = _context.Theses.Where(t => t.Status == 1).ToList();
-            ViewBag.AvailableTheses = new SelectList(availableTheses, "IdThesis", "Description");
+            // Si el modelo no es válido, recargar las listas y retornar la vista con el modelo actual
+            if (!ModelState.IsValid)
+            {
+                // Recargar las listas en ViewBag si el modelo no es válido
+                ViewBag.AvailableTheses = _context.Theses
+                    .Where(t => t.Status == 1)
+                    .Select(t => new SelectListItem
+                    {
+                        Value = t.IdThesis.ToString(),
+                        Text = t.Description
+                    })
+                    .ToList();
 
-            // Recargar el combo de Profesionales y Personas
-            List<SelectListItem> professionalsAndPersons = await (from p in _context.Professionals
-                                                                  join per in _context.People on p.IdPerson equals per.IdPerson
-                                                                  select new SelectListItem
-                                                                  {
-                                                                      Value = $"{p.IdProfessional}",
-                                                                      Text = $"{per.Names} {per.Lastname}"
-                                                                  }).ToListAsync();
+                ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                                  join per in _context.People on p.IdPerson equals per.IdPerson
+                                                  where p.Status == 1 // Filtrar profesionales activos
+                                                  select new SelectListItem
+                                                  {
+                                                      Value = p.IdProfessional.ToString(),
+                                                      Text = $"{per.Names} {per.Lastname}"
+                                                  }).ToList();
 
-            ViewBag.ProfessionalsAndPersons = professionalsAndPersons;
+                // Retornar la vista con los errores de validación
+                return View(model);
+            }
 
-            return View(activity1);
+            try
+            {
+                // Crear la actividad
+                var activity = new Activity
+                {
+                    Description = model.description,
+                    Auditorium = model.auditorium,
+                    DateActivity = model.dateActivity,
+                    Place = model.place,
+                    IdThesis = model.idThesis,
+                    Latitude = model.latitude,
+                    Longitude = model.longitude,
+                    RegisterDate = DateTime.Now,
+                    LastUpdate = DateTime.Now,
+                    StateActivity = "Pendiente",
+                    Status = 1 // Estatus activo por defecto
+                };
+
+                _context.Activities.Add(activity);
+                await _context.SaveChangesAsync();
+
+                // Crear la relación en ActivityProfessional si hay un profesional seleccionado
+                if (model.Professionals > 0)
+                {
+                    var activityProfessional = new Models.DB1.ActivityProfessional
+                    {
+                        IdActivity = activity.IdActivity,
+                        IdProfessional = model.Professionals
+                    };
+                    _context.ActivityProfessionals.Add(activityProfessional);
+                }
+
+                // Guardar cambios en la base de datos
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Manejar errores y recargar las listas
+                ModelState.AddModelError("", "Ocurrió un error al guardar la actividad. Por favor, inténtalo de nuevo.");
+                ViewBag.AvailableTheses = _context.Theses
+                    .Where(t => t.Status == 1)
+                    .Select(t => new SelectListItem
+                    {
+                        Value = t.IdThesis.ToString(),
+                        Text = t.Description
+                    })
+                    .ToList();
+
+                ViewBag.AvailableProfessionals = (from p in _context.Professionals
+                                                  join per in _context.People on p.IdPerson equals per.IdPerson
+                                                  where p.Status == 1
+                                                  select new SelectListItem
+                                                  {
+                                                      Value = p.IdProfessional.ToString(),
+                                                      Text = $"{per.Names} {per.Lastname}"
+                                                  }).ToList();
+
+                return View(model);
+            }
         }
+
+
+
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(ActivityModel activity1)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            // Establecer la fecha de registro y actualización
+        //            activity1.registerDate = DateTime.Now;
+        //            activity1.lastUpdate = DateTime.Now;
+
+        //            // Crear una nueva actividad
+        //            Activity activity = new Activity
+        //            {
+        //                Auditorium = activity1.auditorium,
+        //                DateActivity = activity1.dateActivity,
+        //                Description = activity1.description,
+        //                HasAssistance = activity1.hasAssistance,
+        //                HasPayment = activity1.hasPayment,
+        //                IdThesis = activity1.idThesis,
+        //                Latitude = activity1.latitude,
+        //                Longitude = activity1.longitude,
+        //                Status = activity1.status,
+        //                StateActivity = "Pendiente",
+        //                Place = activity1.place,
+        //                RegisterDate = DateTime.Now
+        //            };
+
+        //            // Guardar la actividad en la base de datos
+        //            _context.Activities.Add(activity);
+        //            await _context.SaveChangesAsync();
+
+        //            // Guardar el voucher asociado a la actividad
+        //            if (activity1.voucherAsistenceFile != null && activity1.voucherAsistenceFile.Length > 0)
+        //            {
+        //                var activityVoucher = new Models.DB1.ActivityVoucher
+        //                {
+        //                    VoucherType = "Comprobante de Asistencia",
+        //                    VoucherFile = await ConvertToByteArrayAsync(activity1.voucherAsistenceFile),
+        //                    NameFile = activity1.voucherAsistenceFile.FileName,
+        //                    IdActivity = activity.IdActivity
+        //                };
+
+        //                _context.ActivityVouchers.Add(activityVoucher);
+        //                await _context.SaveChangesAsync();
+        //            }
+
+        //            // Guardar el voucher asociado al pago
+        //            if (activity1.voucherPayFile != null && activity1.voucherPayFile.Length > 0)
+        //            {
+        //                var activityVoucher1 = new Models.DB1.ActivityVoucher
+        //                {
+        //                    VoucherType = "Comprobante de Pago",
+        //                    VoucherFile = await ConvertToByteArrayAsync(activity1.voucherPayFile),
+        //                    NameFile = activity1.voucherPayFile.FileName,
+        //                    IdActivity = activity.IdActivity
+        //                };
+
+        //                _context.ActivityVouchers.Add(activityVoucher1);
+        //                await _context.SaveChangesAsync();
+        //            }
+
+        //            // Guardar los profesionales asociados a la actividad
+        //            if (activity1.ProfessionalsAndPersons != null)
+        //            {
+        //                foreach (var id in activity1.ProfessionalsAndPersons)
+        //                {
+        //                    var activityProfessional = new Models.DB1.ActivityProfessional
+        //                    {
+        //                        IdActivity = activity.IdActivity,
+        //                        IdProfessional = id
+        //                    };
+        //                    _context.ActivityProfessionals.Add(activityProfessional);
+        //                    await _context.SaveChangesAsync();
+        //                }
+        //            }
+
+        //            // Obtener la lista de profesionales
+        //            var professionalIds = activity1.ProfessionalsAndPersons;
+        //            var profesionalList = await (from p in _context.Professionals
+        //                                         join per in _context.People on p.IdPerson equals per.IdPerson
+        //                                         where professionalIds.Contains(p.IdProfessional)
+        //                                         select per).ToListAsync();
+
+        //            // Obtener información del estudiante (tesis)
+        //            var thesisId = activity1.idThesis;
+        //            var student = await _context.Theses.Where(x => x.IdThesis == thesisId).FirstOrDefaultAsync();
+        //            string studentName = student?.Student ?? "";
+        //            string studentCareer = student?.Career ?? "";
+
+        //            // Preparar contenido del correo electrónico
+        //            string emailContent = $"Buenas tardes,<br/><br/>Te informamos que has sido seleccionado/a para formar parte del tribunal en la próxima actividad.<br/>Fecha y hora de la actividad: {activity1.dateActivity}.<br/>Agradecemos tu colaboración y compromiso.<br/><br/>Saludos cordiales.";
+
+        //            // Enviar correos electrónicos a los profesionales
+        //            foreach (var itemProfesional in profesionalList)
+        //            {
+        //                var streamTemp = _wordProcessor.ModelLetter(_directoryPath, _templateLetter, new AttributeReplaceLetter
+        //                {
+        //                    Carrera = studentCareer,
+        //                    FechaCarta = GetDateSpanish(),
+        //                    FechaPresentacion = GetDateTimeSpanish(activity1.dateActivity),
+        //                    NombrePostulante = studentName,
+        //                    Profesional = itemProfesional.Names + " " + itemProfesional.Lastname
+        //                });
+
+        //                await _emailSender.SendEmailAsync(itemProfesional.Email, "Detalles de tu cuenta", emailContent, streamTemp.memoryStream, streamTemp.NameFile);
+        //            }
+
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            // Manejar cualquier excepción que ocurra durante el proceso de guardado
+        //            ModelState.AddModelError("", "Ocurrió un error al guardar la actividad. Por favor, inténtalo de nuevo.");
+        //        }
+        //    }
+
+        //    // Si hay errores de validación, recargar la vista con los datos ingresados por el usuario
+        //    List<Thesis> availableTheses = _context.Theses.Where(t => t.Status == 1).ToList();
+        //    ViewBag.AvailableTheses = new SelectList(availableTheses, "IdThesis", "Description");
+
+        //    // Recargar el combo de Profesionales y Personas
+        //    List<SelectListItem> professionalsAndPersons = await (from p in _context.Professionals
+        //                                                          join per in _context.People on p.IdPerson equals per.IdPerson
+        //                                                          select new SelectListItem
+        //                                                          {
+        //                                                              Value = $"{p.IdProfessional}",
+        //                                                              Text = $"{per.Names} {per.Lastname}"
+        //                                                          }).ToListAsync();
+
+        //    ViewBag.ProfessionalsAndPersons = professionalsAndPersons;
+
+        //    return View(activity1);
+        //}
 
 
         private string GetDateSpanish()
